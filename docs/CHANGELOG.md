@@ -1,5 +1,62 @@
 # FishQuest Changelog
 
+## 2026-05-23
+
+### Catch Logging Flow Added
+
+- Added `expo-image-picker` for local catch photo selection.
+- Added Log Catch form with species selection, date/time, optional length/weight, notes, privacy, save draft, and submit actions.
+- Added catch validation for required species/date, valid time, non-negative measurements, privacy, and note length.
+- Added `services/catches/` for catch creation, local draft persistence, and local pending media queue.
+- Catch submission now inserts into `catches` and creates/updates `user_fishdex_entries`.
+- Photo selection is local-only for now and queues pending media after submission; Supabase Storage upload is intentionally deferred until signed/private upload policies exist.
+- Moved Log Catch draft/submit actions and feedback near the top of the screen so submit is visible on mobile.
+
+### FishDex Starter Catalog Added
+
+- Added `supabase/migrations/202605230003_seed_starter_catalog.sql` with starter regions, species, and species-region mappings.
+- Added read-only FishDex catalog service in `services/fishdex/`.
+- Added FishDex feature components for catalog summary and species cards.
+- Replaced the FishDex placeholder tab with a service-backed starter catalog view.
+- Added loading, empty, error, and refresh states for the FishDex tab.
+
+### FishDex Core Browsing Added
+
+- Added region filter chips for the FishDex list.
+- Added locked/undiscovered species presentation.
+- Added hidden tab detail route at `/fishdex/[id]`.
+- Added species detail UI with rarity, locked state, field notes, habitat, range, and discovery status.
+- Extended FishDex service types with `FishdexRegion`, region IDs, and `getFishdexSpecies`.
+
+### Core Database Schema Added
+
+- Added `supabase/migrations/202605230002_create_core_schema.sql`.
+- Added production-oriented tables for regions, species, species-region mappings, catches, catch media, user FishDex entries, signals, subscriptions, AI classifications, and audit logs.
+- Extended `profiles` with `home_region_id` and `deleted_at`.
+- Added foreign keys, check constraints, timestamp triggers, soft-delete columns, and common query indexes.
+- Added RLS policies for catalog reads, user-owned journal/progress data, subscription reads, and AI classification reads.
+- Kept subscription writes, AI classification writes, catalog writes, signal writes, and audit logs server-side/service-role only.
+- Updated `types/database.ts` so the typed Supabase client knows the current schema shape.
+- Rewrote `DATABASE_SCHEMA.md` as the source of truth for implemented tables and RLS strategy.
+
+### Supabase Auth Foundation Added
+
+- Added centralized `AuthProvider` and `useAuth` hook for the single auth session source of truth.
+- Added secure native Supabase session storage with `expo-secure-store`; web falls back to AsyncStorage.
+- Added email sign in and account creation behavior.
+- Added native Apple Sign In client flow with nonce handling.
+- Added Google OAuth client flow using Expo WebBrowser auth sessions.
+- Added route protection for main tabs and redirect behavior for authenticated users in auth routes.
+- Added logout behavior to the Profile tab.
+- Added auth callback route.
+- Added `AppTextInput` UI primitive for token-backed auth inputs.
+- Added initial `profiles` table migration with owner-only RLS policies.
+- Added best-effort profile creation after login/session restore.
+
+### Auth Foundation Verified
+
+- `npm run typecheck` passes.
+
 ## 2026-05-22
 
 ### Design System Foundation Added

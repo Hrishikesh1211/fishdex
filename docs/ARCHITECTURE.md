@@ -1,10 +1,10 @@
 # FishQuest Architecture
 
-Last audited: 2026-05-22
+Last audited: 2026-05-23
 
 ## Audit Status
 
-The repository now contains an Expo SDK 54 React Native foundation, design-system layer, and production-quality navigation shell. Full product features, backend integration, and real auth are still pending.
+The repository now contains an Expo SDK 54 React Native foundation, design-system layer, navigation shell, Supabase client setup, and centralized Supabase Auth foundation. Full product features are still pending.
 
 ## Intended Stack
 
@@ -33,6 +33,7 @@ app/
   index.tsx
   (auth)/
     _layout.tsx
+    callback.tsx
     welcome.tsx
     sign-in.tsx
     create-account.tsx
@@ -44,10 +45,13 @@ app/
     index.tsx
     map.tsx
     fishdex.tsx
+    fishdex/
+      [id].tsx
     log-catch.tsx
     signals.tsx
     profile.tsx
 components/
+  fishdex/
   shell/
   ui/
 constants/
@@ -61,7 +65,23 @@ lib/
     publicEnv.ts
   supabase/
     client.ts
+    sessionStorage.ts
     index.ts
+services/
+  auth/
+    oauth.ts
+  fishdex/
+    fishdexService.ts
+  profiles/
+    profileService.ts
+state/
+  auth/
+    AuthProvider.tsx
+    index.ts
+supabase/
+  migrations/
+types/
+  database.ts
 docs/
 .env.example
 app.json
@@ -84,7 +104,7 @@ Planned feature/service folders from the original architecture remain valid but 
 - `services/`: async domain operations and backend access.
 - `lib/`: client setup and infrastructure wrappers.
 - `hooks/`: reusable React hooks. Hooks may compose services but should not hide unrelated behavior.
-- `state/`: app-level client state, draft state, and session-adjacent state.
+- `state/`: app-level client state, auth provider, draft state, and session-adjacent state.
 - `types/`: shared TypeScript contracts and generated database types.
 - `constants/`: design tokens and stable app constants.
 - `supabase/`: migrations, SQL functions, seed data, and local Supabase metadata.
@@ -98,22 +118,28 @@ Use Expo Router.
 Implemented route groups:
 
 - `(tabs)`: main app shell with `map`, `fishdex`, `log-catch`, `signals`, and `profile`.
-- `(auth)`: placeholder `welcome`, `sign-in`, and `create-account` routes.
+- `(tabs)/fishdex/[id]`: hidden tab route for species detail records.
+- `(auth)`: `welcome`, `sign-in`, `create-account`, and OAuth `callback` routes.
 - `(onboarding)`: placeholder `premium` onboarding route.
 - `+not-found`: tokenized fallback route.
 - `index.tsx`: redirects to `/map`.
 
-No protected route logic exists yet. When real auth is implemented, route protection should live in a root layout or route guard hook, not inside every screen.
+Implemented protected route logic:
+
+- `(tabs)/_layout.tsx` blocks unauthenticated users.
+- `(auth)/_layout.tsx` redirects authenticated users to the Map tab.
+- `index.tsx` redirects based on restored auth state.
 
 Public path constants live in `constants/routes.ts`. Expo route groups are intentionally hidden from public paths, so constants use `/map`, `/welcome`, `/premium`, and similar route values.
 
 ## State Management
 
-No state management implementation exists yet.
+Implemented state:
 
-Recommended approach:
+- Supabase auth session: central `AuthProvider` and `useAuth` hook in `state/auth`.
 
-- Supabase auth session: central auth provider or hook.
+Recommended approach for future state:
+
 - Server/cache state: use a query library only if the app complexity justifies it. If introduced, document it here.
 - Local UI state: React state.
 - Offline catch drafts: local persisted state using a documented storage adapter.
@@ -136,6 +162,11 @@ Implemented foundation:
 
 - `lib/env/publicEnv.ts`: validates public Expo runtime config.
 - `lib/supabase/client.ts`: lazy singleton Supabase client.
+- `lib/supabase/sessionStorage.ts`: SecureStore-backed native auth session storage.
+- `state/auth/AuthProvider.tsx`: session restore, auth actions, and route guard state.
+- `services/auth/oauth.ts`: Apple and Google provider flows.
+- `services/fishdex/fishdexService.ts`: read-only FishDex catalog/detail service.
+- `services/profiles/profileService.ts`: profile upsert after auth.
 - `.env.example`: documents `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`, `EXPO_PUBLIC_APP_ENV`, and the backend-only `SUPABASE_SERVICE_ROLE_KEY`.
 
 Only the public anon key may be used in Expo mobile runtime. Service-role keys are backend/server only.
@@ -148,7 +179,7 @@ AI fish identification should be introduced behind `services/identification` and
 
 Expected storage:
 
-- Postgres: profiles, catches, species, FishDex progress, trips, subscriptions metadata.
+- Postgres: profiles, regions, species, species-region mappings, catches, catch media metadata, FishDex progress, signals, subscriptions, AI classification records, and audit logs.
 - Supabase Storage: user-uploaded catch photos.
 - Device storage: auth session persistence, offline catch drafts, maybe cached read-only species metadata.
 
@@ -235,4 +266,7 @@ Expo React Native App
 - Premium onboarding placeholder route exists.
 - UI primitives and token system exist.
 - Supabase client foundation and public env validation exist.
-- No real auth behavior, business services, state stores, database files, migrations, RLS policies, storage buckets, or product features exist yet.
+- Real Supabase Auth behavior exists for email, Apple, and Google client flows.
+- Initial profile migration and RLS policies exist.
+- Read-only FishDex browsing exists with list, region filter, rarity display, locked states, and species detail route.
+- No catch journal, storage buckets, RevenueCat, PostHog, Sentry, Mapbox, or AI identification features exist yet.

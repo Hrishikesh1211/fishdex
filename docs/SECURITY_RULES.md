@@ -1,10 +1,10 @@
 # FishQuest Security Rules
 
-Last audited: 2026-05-22
+Last audited: 2026-05-23
 
 ## Audit Status
 
-No security-sensitive implementation exists in this workspace at audit time. These rules govern future implementation.
+Security-sensitive auth implementation now exists. Supabase Auth sessions are centralized and native session persistence uses SecureStore.
 
 ## Secret Management
 
@@ -21,6 +21,8 @@ No security-sensitive implementation exists in this workspace at audit time. The
 - RLS must enforce ownership.
 - Sign out must clear sensitive local state.
 - Account deletion must be supported before production.
+- The mobile client stores Supabase sessions through `expo-secure-store` on native platforms.
+- Web uses AsyncStorage fallback only because SecureStore is native-only.
 
 ## Upload Security
 
@@ -42,6 +44,14 @@ No security-sensitive implementation exists in this workspace at audit time. The
 ## RLS Rules
 
 Every user-owned table must have RLS enabled.
+
+Implemented:
+
+- `profiles` has owner-only select, insert, and update policies.
+- `catches`, `catch_media`, and `user_fishdex_entries` have owner-only policies.
+- `regions`, `species`, `species_regions`, and active `signals` are readable by authenticated users.
+- `subscriptions` and `ai_classifications` are readable by the owning user but written server-side.
+- `audit_logs` has RLS enabled with no mobile-client policies.
 
 Minimum policy expectations:
 
@@ -66,6 +76,8 @@ Minimum policy expectations:
 - Treat precise location and catch notes as private.
 - Avoid putting sensitive data in route params.
 - Keep dependencies current and remove unused packages.
+- Current catch logging does not collect exact latitude/longitude.
+- Selected catch photos remain local until signed private Storage upload is implemented.
 
 ## Admin Security
 
@@ -87,4 +99,3 @@ Minimum policy expectations:
 - Provide account deletion.
 - Support data export or deletion workflows as required.
 - Follow App Store guidance for Sign In with Apple and subscriptions.
-

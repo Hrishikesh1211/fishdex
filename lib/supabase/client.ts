@@ -1,11 +1,12 @@
 import "react-native-url-polyfill/auto";
 
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 import { validatePublicEnv } from "../env/publicEnv";
+import { supabaseSessionStorage } from "./sessionStorage";
+import type { Database } from "../../types/database";
 
-let supabaseClient: SupabaseClient | null = null;
+let supabaseClient: SupabaseClient<Database> | null = null;
 
 export function getSupabaseClient() {
   if (supabaseClient) {
@@ -14,12 +15,12 @@ export function getSupabaseClient() {
 
   const env = validatePublicEnv();
 
-  supabaseClient = createClient(env.supabaseUrl, env.supabaseAnonKey, {
+  supabaseClient = createClient<Database>(env.supabaseUrl, env.supabaseAnonKey, {
     auth: {
       autoRefreshToken: true,
       detectSessionInUrl: false,
       persistSession: true,
-      storage: AsyncStorage,
+      storage: supabaseSessionStorage,
     },
   });
 

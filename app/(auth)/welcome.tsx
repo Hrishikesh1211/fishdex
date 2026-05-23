@@ -11,21 +11,18 @@ export default function WelcomeScreen() {
     <ShellScreen
       eyebrow="Welcome"
       title="Begin beside the water."
-      description="A premium auth welcome shell. Real authentication is intentionally not wired yet."
+      description="Your catches, discoveries, and field notes are kept behind your account."
     >
       <Card elevated>
         <View style={styles.stack}>
           <AppText variant="body" tone="secondary">
-            Choose an auth placeholder route to confirm navigation.
+            Sign in to continue your FishQuest archive, or create a new journal before the first cast.
           </AppText>
           <Link href={routes.auth.signIn} asChild>
             <AppButton label="Sign In" />
           </Link>
           <Link href={routes.auth.createAccount} asChild>
             <AppButton label="Create Account" variant="secondary" />
-          </Link>
-          <Link href={routes.tabs.map} asChild>
-            <AppButton label="Enter App Shell" variant="ghost" />
           </Link>
         </View>
       </Card>

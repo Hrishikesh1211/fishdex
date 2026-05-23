@@ -1,6 +1,6 @@
 # FishQuest UI System
 
-Last updated: 2026-05-22
+Last updated: 2026-05-23
 
 ## Audit Status
 
@@ -140,8 +140,32 @@ All components are in `components/ui/` and exported through `components/ui/index
 - `ProgressPill`: compact progress label and bar with accessible progress text.
 - `EmptyState`: calm empty-state container with optional action.
 - `LoadingState`: accessible loading row that respects reduced motion by replacing the spinner with a static indicator.
+- `AppTextInput`: token-backed form input for auth and future form flows.
 
 The current app shell uses `components/shell/` for repeated screen layout and tab glyphs. These shell components compose the lower-level `components/ui/` primitives and are not business features.
+
+## FishDex Feature UI
+
+Implemented feature components in `components/fishdex/`:
+
+- `FishdexSummary`: collectible progress summary using `ProgressPill`.
+- `FishdexRegionFilter`: horizontal token-backed region filter chips.
+- `FishdexSpeciesCard`: list card with rarity, region metadata, specimen mark, and locked/undiscovered state.
+- `FishdexSpeciesDetail`: detail composition for rarity, locked state, field notes, habitat, range, and discovery status.
+
+Locked species should feel mysterious and collectible without blocking navigation. Keep rarity visible, show a restrained specimen mark, and reveal full descriptive notes only after discovery/catch logic exists.
+
+## Catch Logging Feature UI
+
+The Log Catch screen uses existing primitives rather than a separate form system:
+
+- Cards group one decision at a time: species, photo, time, measurements, notes, privacy, and actions.
+- Species and privacy use token-backed pressable choices with selected states.
+- Date/time uses quick actions plus editable fields until a native date picker abstraction is introduced.
+- Photo selection is visually clear but described as local/pending until signed private upload is implemented.
+- Validation errors are grouped near the final actions and use `AppText` danger tone.
+
+Catch logging should stay calm and field-friendly. Avoid dense utility forms, exact coordinate exposure, or noisy gamified feedback during the save flow.
 
 ## Accessibility Rules
 

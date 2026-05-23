@@ -1,6 +1,6 @@
 # FishQuest Feature Status
 
-Last audited: 2026-05-22
+Last audited: 2026-05-23
 
 ## Status Legend
 
@@ -14,26 +14,27 @@ Last audited: 2026-05-22
 | Documentation memory system | Complete | 100% | None | None | Initial docs created in `docs/`. |
 | Expo app scaffold | Complete | 100% | Package manager, Expo SDK 54 | None | Minimal Expo SDK 54 app exists with `app.json`, `package.json`, and Expo Router entry for current Expo Go compatibility. |
 | TypeScript setup | Complete | 100% | App scaffold | None | Strict `tsconfig.json`; `npm run typecheck` passes. |
-| Expo Router navigation | In progress | 75% | App scaffold | Real auth guards and feature details | Root layout, main tabs, auth placeholders, premium onboarding placeholder, route constants, and not-found route exist. |
+| Expo Router navigation | In progress | 85% | App scaffold, auth provider | Feature details | Root layout, main tabs, auth routes, premium onboarding placeholder, route constants, not-found route, and auth guards exist. |
 | NativeWind styling | Complete | 100% | App scaffold | None | NativeWind configured with token-backed `tailwind.config.js`, `babel.config.js`, `metro.config.js`, and `global.css`. |
-| UI primitives | In progress | 55% | Design tokens | Inputs/lists not built yet | Core primitives built: AppScreen, AppText, AppButton, Card, RarityBadge, ProgressPill, EmptyState, LoadingState. |
+| UI primitives | In progress | 65% | Design tokens | Lists/selectors not built yet | Core primitives built: AppScreen, AppText, AppTextInput, AppButton, Card, RarityBadge, ProgressPill, EmptyState, LoadingState. |
 | Design tokens | Complete | 100% | NativeWind or constants | None | Colors, spacing, typography, radius, shadows, rarity, and motion tokens exist. |
 | Environment structure | Complete | 100% | Expo public env | Real keys not committed | `.env.example` documents app env, Supabase URL, anon key, and service-role restrictions. |
-| Supabase client | Complete | 100% | Env vars, package install | Real anon key required at runtime | Centralized lazy client exists in `lib/supabase`; no auth behavior is wired yet. |
-| Database migrations | Not started | 0% | Supabase project | Schema decisions | Start with profiles, species, catches. |
-| Auth session provider | Not started | 0% | Supabase client | Provider configuration | Central route protection required. |
-| Auth placeholder routes | Complete | 100% | Expo Router navigation | None | Welcome, Sign In, and Create Account placeholders exist without real auth. |
-| Apple Sign In | Not started | 0% | Auth foundation, Apple config | Apple developer setup | Primary iOS auth path. |
-| Google Sign In | Not started | 0% | Auth foundation, OAuth config | Google OAuth setup | Optional secondary path. |
-| Profile management | Not started | 0% | Auth, profiles table | None | Minimal profile first. |
-| FishDex catalog | Not started | 0% | Species schema, seed data | Species data source | Core collectible feature. |
-| FishDex progress | Not started | 0% | Catches, fishdex_entries | None | Discovery state from catches. |
-| Species detail | Not started | 0% | FishDex catalog, UI system | Species media | Important premium surface. |
-| Catch logging | Not started | 0% | Auth, catches table, UI | None | Core MVP workflow. |
-| Catch list | Not started | 0% | Catch logging | None | Personal journal timeline. |
+| Supabase client | Complete | 100% | Env vars, package install | Real anon key required at runtime | Centralized lazy client exists in `lib/supabase` with SecureStore-backed native session persistence. |
+| Database migrations | In progress | 60% | Supabase project | Generate types | Initial production schema and starter catalog seed migrations exist and have been applied in the current Supabase project. Storage policies and generated types are pending. |
+| Auth session provider | Complete | 100% | Supabase client, SecureStore | None | Central `AuthProvider` restores sessions, listens to auth state, and exposes auth actions. |
+| Auth routes | In progress | 80% | Expo Router navigation, auth provider | Password reset/account deletion | Welcome, Sign In, Create Account, and callback routes are wired to auth behavior. |
+| Apple Sign In | In progress | 60% | Auth foundation, Apple config | Apple developer/Supabase provider setup | Native client flow implemented with nonce; external provider setup still required. |
+| Google Sign In | In progress | 60% | Auth foundation, OAuth config | Google OAuth/Supabase provider setup | Expo WebBrowser OAuth flow implemented; external provider setup still required. |
+| Email auth | In progress | 75% | Supabase Auth | Password reset, email template decisions | Sign in and account creation are implemented. |
+| Profile management | In progress | 20% | Auth, profiles table | Apply migration | Best-effort profile creation exists; editing and full profile UI are pending. |
+| FishDex catalog | In progress | 65% | Species schema, seed data, auth | Search/sort polish and richer species media | Starter seed data, read service, list screen, region filter, locked states, rarity display, and detail route exist. |
+| FishDex progress | Planned | 5% | Catches, user_fishdex_entries | Progress service rules | Schema exists; discovery update logic is not implemented. |
+| Species detail | In progress | 55% | FishDex catalog, UI system | Rich media and catch-derived personal records | Detail route exists with rarity, locked state, field notes, habitat, range, and discovery status. |
+| Catch logging | In progress | 45% | Auth, catches table, FishDex species | Catch list/detail/edit and cloud photo upload | Log Catch form, local drafts, validation, submit, and FishDex progress update exist. |
+| Catch list | Not started | 0% | Catch logging | List service and UI | Personal journal timeline. |
 | Catch detail/edit | Not started | 0% | Catch list | None | Needed for trust and correction. |
-| Photo upload | Not started | 0% | Supabase Storage | Storage policies | Private by default. |
-| Offline drafts | Not started | 0% | Local storage strategy | Sync model | Field reliability feature. |
+| Photo upload | In progress | 15% | Supabase Storage | Storage bucket, signed upload flow, and policies | Photo picker and local pending upload queue exist; no cloud upload yet. |
+| Offline drafts | In progress | 35% | Local storage strategy | Sync queue and conflict model | Log Catch can save/restore one local draft; full offline sync is pending. |
 | Trips | Planned | 0% | Catch journal | Product scope | Can follow MVP. |
 | Mapbox map/place memory | Planned | 0% | Location data, privacy rules, Mapbox token | Map product scope | Must feel atmospheric, not like a dense utility map. |
 | AI fish identification | Planned | 0% | Catch photos, secure backend, consent model | Provider/model decision | Assistive only; user confirmation required. |

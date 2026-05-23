@@ -1,6 +1,7 @@
 export { AppButton } from "./AppButton";
 export { AppScreen } from "./AppScreen";
 export { AppText } from "./AppText";
+export { AppTextInput } from "./AppTextInput";
 export { Card } from "./Card";
 export { EmptyState } from "./EmptyState";
 export { LoadingState } from "./LoadingState";

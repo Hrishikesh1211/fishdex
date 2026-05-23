@@ -1,10 +1,10 @@
 # FishQuest Testing Guide
 
-Last audited: 2026-05-22
+Last audited: 2026-05-23
 
 ## Audit Status
 
-No test framework, app source, or package scripts exist in this workspace at audit time.
+No automated test framework exists yet. The app has a TypeScript check script and auth-specific manual smoke tests.
 
 ## Testing Strategy
 
@@ -18,17 +18,12 @@ Testing should scale with product risk:
 - Future Mapbox flows must be tested for permissions, privacy, and low-connectivity behavior.
 - Future AI identification flows must be tested for consent, failed recognition, user correction, and provider errors.
 
-## Future Test Commands
+## Test Commands
 
-No commands exist yet.
-
-Expected future commands:
+Current commands:
 
 ```bash
-npm run lint
 npm run typecheck
-npm run test
-npm run build
 ```
 
 Update this guide with actual scripts after `package.json` exists.
@@ -43,11 +38,21 @@ Run before preview releases:
 - Sign out clears user state.
 - Main navigation tabs render.
 - FishDex list renders.
+- Starter FishDex catalog renders after applying `202605230003_seed_starter_catalog.sql`.
+- FishDex refresh handles loading and error states.
 - Species detail opens.
+- Regional FishDex filter changes the visible species set.
+- Locked species show locked copy but remain openable.
+- Rarity badges appear consistently on list and detail screens.
 - Catch creation opens.
 - Catch can be saved.
 - Catch list updates after save.
-- Photo selection/upload path works if implemented.
+- Log Catch can save and restore a local draft.
+- Log Catch validates missing species, invalid date/time, negative measurements, and long notes.
+- Log Catch can submit a catch and FishDex progress updates after refresh/navigation.
+- Photo picker can attach one local photo to a draft.
+- Submitted photo is queued locally for future upload and is not exposed as a public URL.
+- Photo selection works in Log Catch; cloud upload remains pending.
 - Offline draft survives app restart if implemented.
 - Premium entitlement screen loads if implemented.
 - Sentry captures test error in non-production if configured.
@@ -66,11 +71,32 @@ Run before preview releases:
 - Sign out.
 - Account deletion request path.
 - Protected route redirect behavior.
+- Email/password sign in.
+- Email account creation with and without email confirmation enabled.
+- App restart session restore.
+- Profile upsert after first login once the profiles migration is applied.
+- Missing profiles table warning does not crash the app.
+- Google OAuth cancellation.
+- Apple Sign In cancellation.
+
+## Auth Smoke Test Flow
+
+1. Start from a fresh install or sign out.
+2. Confirm `/map` redirects to `/welcome`.
+3. Create an email account.
+4. If email confirmation is enabled, confirm the email and then sign in.
+5. Confirm the Map tab loads.
+6. Close and reopen the app; confirm the session restores without returning to auth.
+7. Open Profile and sign out.
+8. Confirm tabs redirect back to `/welcome`.
+9. Try an invalid password and confirm an error appears.
+10. After applying the profiles migration, confirm `public.profiles` has one row for the signed-in user.
 
 ## Upload Testing
 
 Once media upload exists:
 
+- Current state: picker and local pending upload queue exist; Supabase Storage upload does not.
 - Upload one catch photo.
 - Upload multiple photos if supported.
 - Cancel photo picker.
@@ -83,6 +109,7 @@ Once media upload exists:
 
 Once offline drafts exist:
 
+- Current state: one Log Catch draft can be saved and restored locally.
 - Create catch with no network.
 - Attach photo with no network.
 - Restart app before sync.
@@ -113,7 +140,7 @@ Use dedicated staging users and staging Supabase data. Do not test destructive f
 ## Current Gaps
 
 - No automated tests.
-- No app to smoke test.
+- No automated smoke test runner.
 - No scripts.
 - No QA fixtures.
 - No staging environment.

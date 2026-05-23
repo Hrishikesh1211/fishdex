@@ -7,6 +7,7 @@ export const routes = {
   tabs: {
     map: route("/map"),
     fishdex: route("/fishdex"),
+    fishdexSpecies: (speciesId: string) => route(`/fishdex/${speciesId}`),
     logCatch: route("/log-catch"),
     signals: route("/signals"),
     profile: route("/profile"),
@@ -15,6 +16,7 @@ export const routes = {
     welcome: route("/welcome"),
     signIn: route("/sign-in"),
     createAccount: route("/create-account"),
+    callback: route("/callback"),
   },
   onboarding: {
     premium: route("/premium"),

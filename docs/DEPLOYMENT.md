@@ -122,10 +122,11 @@ Dashboard steps:
 3. Copy the Project URL into `EXPO_PUBLIC_SUPABASE_URL`.
 4. Copy the public anon key into `EXPO_PUBLIC_SUPABASE_ANON_KEY`.
 5. Do not copy the service-role key into Expo env files.
-6. Go to Authentication > Providers and configure Apple/Google later when auth is implemented.
-7. Go to Authentication > URL Configuration later and add the Expo/native redirect URLs required by the implemented auth flow.
-8. Create private Storage buckets only when upload flows are implemented.
-9. Enable and verify RLS policies before any user-owned tables are used by the app.
+6. Go to Authentication > Providers and configure Email, Apple, and Google for the target environment.
+7. Go to Authentication > URL Configuration and add the Expo/native redirect URLs required by the implemented auth flow. The app generates its OAuth callback with `Linking.createURL("callback")`.
+8. Apply `supabase/migrations/202605230001_create_profiles.sql` before testing profile sync.
+9. Create private Storage buckets only when upload flows are implemented.
+10. Enable and verify RLS policies before any user-owned tables are used by the app.
 
 ## Staging and Production Strategy
 

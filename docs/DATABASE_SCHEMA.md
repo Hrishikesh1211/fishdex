@@ -1,44 +1,85 @@
 # FishQuest Database Schema
 
-Last audited: 2026-05-22
+Last audited: 2026-05-23
 
 ## Audit Status
 
-No Supabase files, migrations, generated database types, seed data, or schema files exist in this workspace at audit time.
+FishQuest now has a first production-oriented Supabase schema migration set.
 
-## Current DB Structure
+Implemented migrations:
 
-None implemented.
+- `supabase/migrations/202605230001_create_profiles.sql`
+- `supabase/migrations/202605230002_create_core_schema.sql`
+- `supabase/migrations/202605230003_seed_starter_catalog.sql`
 
-## Planned Schema Principles
+Implemented local database type contract:
+
+- `types/database.ts`
+
+Generated Supabase types are still pending. Replace the hand-written type contract with generated types once the Supabase CLI type generation workflow is configured.
+
+## Schema Principles
 
 - Use Postgres through Supabase.
 - Use UUID primary keys.
-- Use `created_at` and `updated_at` timestamps on mutable tables.
-- Use RLS on every user-owned table.
-- Keep species catalog data separate from user progress.
-- Keep uploaded media metadata separate from catch records when multiple photos are possible.
+- Use `created_at` and `updated_at` on mutable tables.
+- Use `deleted_at` for soft-deletable user-owned or editorial records.
+- Keep Supabase `auth.users` as the identity source.
+- Keep app-specific user fields in `public.profiles`.
+- Keep species catalog data separate from user FishDex progress.
+- Keep uploaded media metadata separate from catches.
+- Keep subscription state server-written.
+- Keep AI provider details and audit logs server-controlled.
 - Preserve migrations. Do not hand-edit production schemas without a migration.
 
-## Planned Tables
+## Current Tables
 
 ### `profiles`
 
-Responsibility: app-specific user profile associated with Supabase auth user.
+App-specific user profile associated with Supabase Auth.
 
-Likely columns:
+Key columns:
 
-- `id uuid primary key references auth.users(id)`
+- `id uuid primary key references auth.users(id) on delete cascade`
 - `display_name text`
 - `avatar_url text`
+- `home_region_id uuid references regions(id) on delete set null`
 - `created_at timestamptz`
 - `updated_at timestamptz`
+- `deleted_at timestamptz`
+
+RLS:
+
+- Users can select, insert, and update their own profile.
+- No public profile reads until social/public sharing is intentionally designed.
+
+### `regions`
+
+Canonical geography/waterbody hierarchy for FishDex, catches, and signals.
+
+Key columns:
+
+- `id uuid primary key`
+- `parent_region_id uuid references regions(id) on delete set null`
+- `slug text unique`
+- `name text`
+- `region_type text`
+- `country_code text`
+- `latitude double precision`
+- `longitude double precision`
+- `metadata jsonb`
+- `created_at`, `updated_at`, `deleted_at`
+
+RLS:
+
+- Authenticated users can read active regions.
+- Writes are reserved for trusted backend/admin workflows.
 
 ### `species`
 
-Responsibility: canonical FishDex catalog.
+Canonical FishDex species catalog.
 
-Likely columns:
+Key columns:
 
 - `id uuid primary key`
 - `common_name text`
@@ -46,22 +87,45 @@ Likely columns:
 - `description text`
 - `habitat text`
 - `rarity text`
-- `region_tags text[]`
 - `image_url text`
-- `created_at timestamptz`
-- `updated_at timestamptz`
+- `metadata jsonb`
+- `created_at`, `updated_at`, `deleted_at`
+
+RLS:
+
+- Authenticated users can read active species.
+- Writes are reserved for trusted backend/admin workflows.
+
+### `species_regions`
+
+Join table describing where species are present.
+
+Key columns:
+
+- `id uuid primary key`
+- `species_id uuid references species(id) on delete cascade`
+- `region_id uuid references regions(id) on delete cascade`
+- `presence_status text`
+- `created_at`, `updated_at`
+- Unique pair: `(species_id, region_id)`
+
+RLS:
+
+- Authenticated users can read species-region mappings.
+- Writes are reserved for trusted backend/admin workflows.
 
 ### `catches`
 
-Responsibility: user catch journal records.
+Private-first user catch journal records.
 
-Likely columns:
+Key columns:
 
 - `id uuid primary key`
-- `user_id uuid references auth.users(id)`
-- `species_id uuid references species(id)`
+- `user_id uuid references auth.users(id) on delete cascade`
+- `species_id uuid references species(id) on delete set null`
 - `caught_at timestamptz`
 - `location_name text`
+- `region_id uuid references regions(id) on delete set null`
 - `latitude double precision`
 - `longitude double precision`
 - `length_value numeric`
@@ -71,128 +135,206 @@ Likely columns:
 - `notes text`
 - `weather_snapshot jsonb`
 - `privacy text`
-- `created_at timestamptz`
-- `updated_at timestamptz`
+- `created_at`, `updated_at`, `deleted_at`
 
-### `catch_photos`
+RLS:
 
-Responsibility: metadata for uploaded catch photos.
+- Users can select, insert, and update their own catches.
+- Physical deletes are intentionally not exposed to mobile clients; use `deleted_at` for soft delete.
+- Public/shared catch visibility needs explicit future policies before launch.
 
-Likely columns:
+Implemented app behavior:
+
+- `services/catches/createCatch` inserts user-owned catches.
+- Exact latitude/longitude are not collected by the current Log Catch form.
+- Public privacy can be selected, but no exact location is exposed by the current form.
+
+### `catch_media`
+
+Metadata for catch photos/videos stored in Supabase Storage.
+
+Key columns:
 
 - `id uuid primary key`
-- `catch_id uuid references catches(id)`
-- `user_id uuid references auth.users(id)`
+- `catch_id uuid references catches(id) on delete cascade`
+- `user_id uuid references auth.users(id) on delete cascade`
+- `media_type text`
+- `storage_bucket text`
 - `storage_path text`
 - `width integer`
 - `height integer`
-- `created_at timestamptz`
+- `upload_status text`
+- `created_at`, `updated_at`, `deleted_at`
 
-### `fishdex_entries`
+RLS:
 
-Responsibility: per-user discovery state and species progress.
+- Users can read and update their own media metadata.
+- Users can insert media metadata only for catches they own.
+- Storage bucket policies must mirror this ownership model when upload is implemented.
 
-Likely columns:
+Current app behavior:
+
+- Photo picker stores local image metadata in drafts and a local pending upload queue.
+- No `catch_media` rows are inserted until signed/private Storage upload is implemented.
+
+### `user_fishdex_entries`
+
+Per-user collectible FishDex discovery/progress state.
+
+Key columns:
 
 - `id uuid primary key`
-- `user_id uuid references auth.users(id)`
-- `species_id uuid references species(id)`
-- `first_catch_id uuid references catches(id)`
+- `user_id uuid references auth.users(id) on delete cascade`
+- `species_id uuid references species(id) on delete cascade`
+- `first_catch_id uuid references catches(id) on delete set null`
 - `discovered_at timestamptz`
-- `count integer`
-- `best_length_value numeric`
-- `best_weight_value numeric`
-- `created_at timestamptz`
-- `updated_at timestamptz`
+- `catch_count integer`
+- best length/weight fields
+- `created_at`, `updated_at`
+- Unique pair: `(user_id, species_id)`
 
-### `trips`
+RLS:
 
-Responsibility: optional grouping for catches and outdoor sessions.
+- Users can select, insert, and update their own FishDex entries.
+- Future server logic may become the preferred write path if progress rules become complex.
 
-Likely columns:
+### `signals`
+
+Published environmental, seasonal, advisory, or species/region hints for the Signals tab.
+
+Key columns:
 
 - `id uuid primary key`
-- `user_id uuid references auth.users(id)`
+- `region_id uuid references regions(id) on delete set null`
+- `species_id uuid references species(id) on delete set null`
 - `title text`
-- `started_at timestamptz`
-- `ended_at timestamptz`
-- `location_name text`
-- `notes text`
-- `created_at timestamptz`
-- `updated_at timestamptz`
-
-### `subscription_events`
-
-Responsibility: entitlement metadata and webhook history if RevenueCat webhooks are used.
-
-Likely columns:
-
-- `id uuid primary key`
-- `user_id uuid references auth.users(id)`
-- `provider text`
-- `event_type text`
-- `payload jsonb`
-- `created_at timestamptz`
-
-### `identification_requests`
-
-Responsibility: future AI fish identification request and result tracking.
-
-Likely columns:
-
-- `id uuid primary key`
-- `user_id uuid references auth.users(id)`
-- `catch_id uuid references catches(id)`
-- `photo_id uuid references catch_photos(id)`
+- `body text`
+- `signal_type text`
 - `status text`
-- `suggested_species_id uuid references species(id)`
+- `starts_at timestamptz`
+- `ends_at timestamptz`
+- `metadata jsonb`
+- `created_at`, `updated_at`, `deleted_at`
+
+RLS:
+
+- Authenticated users can read active, in-window signals.
+- Writes are reserved for trusted backend/admin workflows.
+
+### `subscriptions`
+
+RevenueCat entitlement snapshot and subscription state.
+
+Key columns:
+
+- `id uuid primary key`
+- `user_id uuid references auth.users(id) on delete cascade`
+- `provider text`
+- `provider_customer_id text`
+- `entitlement_id text`
+- `status text`
+- period timestamps
+- `latest_event_at timestamptz`
+- `metadata jsonb`
+- `created_at`, `updated_at`, `deleted_at`
+
+RLS:
+
+- Users can read their own subscription snapshot.
+- Writes are server-only through RevenueCat webhooks or trusted backend code.
+
+### `ai_classifications`
+
+Future AI fish identification request/result tracking.
+
+Key columns:
+
+- `id uuid primary key`
+- `user_id uuid references auth.users(id) on delete cascade`
+- `catch_id uuid references catches(id) on delete set null`
+- `media_id uuid references catch_media(id) on delete set null`
+- `status text`
+- `suggested_species_id uuid references species(id) on delete set null`
 - `confidence numeric`
 - `provider text`
 - `model text`
 - `result_payload jsonb`
+- `error_message text`
 - `user_confirmed_at timestamptz`
+- `created_at`, `updated_at`, `deleted_at`
+
+RLS:
+
+- Users can read their own classifications.
+- Writes are server-only through an Edge Function or trusted backend. Mobile clients must not call AI providers directly or store provider keys.
+
+### `audit_logs`
+
+Server-side audit trail for sensitive backend/admin events.
+
+Key columns:
+
+- `id uuid primary key`
+- `actor_user_id uuid references auth.users(id) on delete set null`
+- `action text`
+- `target_table text`
+- `target_id uuid`
+- `metadata jsonb`
 - `created_at timestamptz`
-- `updated_at timestamptz`
+
+RLS:
+
+- RLS is enabled with no client policies.
+- Service-role/trusted backend only.
 
 ## Indexing Strategy
 
-Planned indexes:
+Implemented indexes cover:
 
-- `profiles(id)`
-- `species(common_name)`
-- `species(rarity)`
-- `catches(user_id, caught_at desc)`
-- `catches(user_id, species_id)`
-- `catch_photos(catch_id)`
-- `fishdex_entries(user_id, species_id)` unique
-- `trips(user_id, started_at desc)`
-- `identification_requests(user_id, created_at desc)`
-- `identification_requests(catch_id)`
+- Profile home region lookup.
+- Region hierarchy and type filtering.
+- Species common/scientific name lookup.
+- Species rarity filtering.
+- Species-region joins.
+- User catch timeline and user/species catch lookups.
+- Catch media by catch, user, and storage path.
+- User FishDex progress by discovery time.
+- Active signals by region/species.
+- User subscription state and RevenueCat customer lookup.
+- AI classification history by user/catch/media.
+- Audit log actor and target lookup.
 
-Spatial indexes should be considered only after Mapbox-backed location queries or map/place memory are implemented.
+Spatial indexes are intentionally not included yet because PostGIS and Mapbox-backed location queries are not implemented.
 
 ## RLS Strategy
 
-- `profiles`: users can read/update their own profile. Public profile reads only if social features require it.
-- `catches`: users can CRUD their own catches. Shared/public catches require explicit privacy rules.
-- `catch_photos`: users can manage photos for their own catches.
-- `fishdex_entries`: users can read/write their own progress through controlled app logic.
-- `species`: read-only to authenticated users or public if app requires it.
-- `subscription_events`: service role writes only. Users should not modify raw provider events.
-- `identification_requests`: users may read their own requests. Writes should be controlled by service logic or Edge Functions if provider calls are involved.
+Current policy model:
+
+- Catalog reads: authenticated users can read active `regions`, `species`, `species_regions`, and active `signals`.
+- User-owned reads/writes: users can manage their own `profiles`, `catches`, `catch_media`, and `user_fishdex_entries`.
+- Server-owned writes: `subscriptions`, `ai_classifications`, `signals`, catalog tables, and `audit_logs` are written only by trusted backend/admin workflows.
+- Client route guards are UX only. Postgres RLS is the security boundary.
+
+Future policy work:
+
+- Add Supabase Storage policies for private catch media.
+- Add public/shared catch policies only after product privacy rules are finalized.
+- Add admin role helpers if an admin dashboard is built.
+- Add deletion/anonymization procedures for account deletion.
 
 ## Migration Strategy
 
 - All schema changes must be migrations under `supabase/migrations/`.
-- Migrations must be reviewed before production deploy.
-- Generated database types should be refreshed after migrations.
-- Seed data should be explicit and repeatable.
+- Keep migrations linear and append-only after they are applied to shared environments.
+- Refresh generated Supabase TypeScript types after migrations are applied.
+- Seed data should be explicit and repeatable. Starter catalog seed data uses fixed UUIDs and `on conflict` upserts.
 - Destructive migrations require backup and rollback notes.
 
 ## Current Gaps
 
-- No Supabase project initialized.
-- No migrations exist.
-- No generated database types exist.
-- No RLS policies exist.
-- No storage buckets exist.
+- The core schema migration has been applied in the current Supabase project, per user confirmation.
+- Generated Supabase database types are pending.
+- Supabase Storage bucket and storage RLS policies are pending.
+- `catch_media` upload/write flow is pending signed private Storage support.
+- Starter seed species/region data has been applied in the current Supabase project, per user confirmation.
+- Account deletion/anonymization routines are pending.

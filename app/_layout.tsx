@@ -7,6 +7,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { AppLoadingScreen } from "../components/shell";
 import { colors } from "../constants/tokens";
+import { AuthProvider } from "../state/auth";
 
 export default function RootLayout() {
   const [ready, setReady] = useState(false);
@@ -20,17 +21,19 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <StatusBar style="light" />
-      {ready ? (
-        <Stack
-          screenOptions={{
-            animation: "fade",
-            headerShown: false,
-            contentStyle: { backgroundColor: colors.background },
-          }}
-        />
-      ) : (
-        <AppLoadingScreen />
-      )}
+      <AuthProvider>
+        {ready ? (
+          <Stack
+            screenOptions={{
+              animation: "fade",
+              headerShown: false,
+              contentStyle: { backgroundColor: colors.background },
+            }}
+          />
+        ) : (
+          <AppLoadingScreen />
+        )}
+      </AuthProvider>
     </SafeAreaProvider>
   );
 }

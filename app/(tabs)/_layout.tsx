@@ -1,9 +1,21 @@
-import { Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
 
-import { TabGlyph } from "../../components/shell";
+import { AppLoadingScreen, TabGlyph } from "../../components/shell";
+import { routes } from "../../constants/routes";
 import { colors, radius, spacing } from "../../constants/tokens";
+import { useAuth } from "../../state/auth";
 
 export default function TabsLayout() {
+  const { status } = useAuth();
+
+  if (status === "loading") {
+    return <AppLoadingScreen />;
+  }
+
+  if (status !== "authenticated") {
+    return <Redirect href={routes.auth.welcome} />;
+  }
+
   return (
     <Tabs
       initialRouteName="map"
@@ -41,6 +53,12 @@ export default function TabsLayout() {
         options={{
           title: "FishDex",
           tabBarIcon: ({ focused }) => <TabGlyph name="fishdex" focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
+        name="fishdex/[id]"
+        options={{
+          href: null,
         }}
       />
       <Tabs.Screen

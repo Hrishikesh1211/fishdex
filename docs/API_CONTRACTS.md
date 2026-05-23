@@ -1,14 +1,22 @@
 # FishQuest API Contracts
 
-Last audited: 2026-05-22
+Last audited: 2026-05-23
 
 ## Audit Status
 
-No API clients, service functions, Supabase project files, or backend contracts exist in this workspace at audit time.
+Supabase client setup, auth/profile service helpers, read-only FishDex catalog/detail services, and the first catch logging service now exist. Product APIs for cloud media upload, subscriptions, analytics, maps, and AI identification are still pending.
 
 ## Current APIs
 
-None implemented.
+Implemented:
+
+- Supabase Auth session APIs through `state/auth/AuthProvider.tsx`.
+- Apple and Google provider helpers in `services/auth/oauth.ts`.
+- Profile upsert helper in `services/profiles/profileService.ts`.
+- Read-only FishDex catalog/detail service in `services/fishdex/fishdexService.ts`.
+- Catch creation, local draft persistence, and pending local media queue helpers in `services/catches/`.
+- Minimal typed Supabase database contract in `types/database.ts`.
+- Database tables for profiles, regions, species, catches, media metadata, FishDex entries, signals, subscriptions, AI classifications, and audit logs.
 
 Expected future integrations:
 
@@ -96,39 +104,66 @@ These are planned contracts only.
 
 ### Auth
 
-- `getCurrentSession()`
-- `signInWithApple()`
-- `signInWithGoogle()`
-- `signOut()`
-- `onAuthStateChange()`
+- `useAuth().signInWithEmail({ email, password })`
+- `useAuth().signUpWithEmail({ email, password, displayName })`
+- `useAuth().signInWithApple()`
+- `useAuth().signInWithGoogle()`
+- `useAuth().signOut()`
+- `AuthProvider` handles `getSession()` and `onAuthStateChange()` internally.
 
 ### Profile
 
 - `getMyProfile()`
-- `upsertMyProfile()`
+- `ensureUserProfile(user)`
 - `deleteMyAccountRequest()`
 
 ### FishDex
 
-- `listSpecies()`
-- `getSpeciesById()`
+- `listFishdexCatalog(userId)`
+- `getFishdexSpecies(userId, speciesId)`
 - `listMyDiscoveredSpecies()`
 - `markSpeciesDiscoveredFromCatch()`
+
+Current FishDex service types:
+
+- `FishdexCatalog`
+- `FishdexCatalogSpecies`
+- `FishdexRegion`
+
+Current catalog responses include region filter data, rarity, discovery/locked state, catch count, and detail metadata needed by the list and species detail screens.
 
 ### Catch Journal
 
 - `createCatch()`
+- `saveCatchDraft(userId, draft)`
+- `loadCatchDraft(userId)`
+- `clearCatchDraft(userId)`
+- `queuePendingCatchMediaUpload({ userId, catchId, photo })`
 - `updateCatch()`
-- `deleteCatch()`
+- `softDeleteCatch()`
 - `getCatchById()`
 - `listMyCatches()`
 - `syncCatchDraft()`
 
+Current `createCatch` behavior:
+
+- Inserts into `catches`.
+- Validates required species, date/time, privacy, notes length, and non-negative measurements.
+- Updates or creates `user_fishdex_entries` for catch count and best measurements.
+- Does not upload photos yet.
+
 ### Media
 
 - `uploadCatchPhoto()`
-- `deleteCatchPhoto()`
+- `softDeleteCatchMedia()`
 - `getSignedCatchPhotoUrl()`
+
+Current media behavior:
+
+- The Log Catch screen can pick one local image.
+- Selected image metadata is stored in the local draft.
+- After catch submission, the image is queued locally as pending media for a future signed/private Supabase Storage upload flow.
+- Mobile clients must not write permanent public media URLs.
 
 ### Subscription
 
@@ -166,6 +201,10 @@ Planned only after catch media, consent, and backend boundaries exist:
 - `rejectIdentificationSuggestion()`
 
 AI identification responses should include suggested species, confidence, provider/model metadata, and a user-confirmation state. Suggestions must not become authoritative FishDex data until the user confirms or edits them.
+
+### Audit Logs
+
+Audit logs are server-only. Mobile clients must not insert audit rows directly.
 
 ## Versioning
 

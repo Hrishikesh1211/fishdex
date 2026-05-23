@@ -2,6 +2,16 @@
 
 ## 2026-05-23
 
+### Partial Offline Catch Draft Sync Added
+
+- Added `@react-native-community/netinfo` for connectivity-aware retry while Log Catch is mounted.
+- Added AsyncStorage-backed catch sync queue in `services/catches/catchSyncQueue.ts`.
+- Changed Log Catch submit to save a queued draft locally before attempting network sync.
+- Added stable queued catch IDs so retrying a locally saved submission does not create duplicate catch rows.
+- Added retry behavior for pending/failed catch sync, including attached private photo upload.
+- Added Log Catch UI indicators for saved locally, pending sync, synced, and failed sync states.
+- Documented that this is a scoped MVP queue, not a full offline database or background worker.
+
 ### Secure Fish Photo Upload Added
 
 - Added `expo-image-manipulator` for client-side catch photo compression and thumbnail preparation.

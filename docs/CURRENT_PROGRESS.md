@@ -4,7 +4,7 @@ Last audited: 2026-05-23
 
 ## Summary
 
-The workspace now contains the documentation memory system, Expo SDK 54 app foundation, design-system foundation, navigation shell, Supabase client setup, centralized Supabase Auth foundation, the first production-oriented database schema migration, starter catalog seed data, the core read-only FishDex browsing experience, the first catch logging flow, and private Supabase Storage photo upload for catches.
+The workspace now contains the documentation memory system, Expo SDK 54 app foundation, design-system foundation, navigation shell, Supabase client setup, centralized Supabase Auth foundation, the first production-oriented database schema migration, starter catalog seed data, the core read-only FishDex browsing experience, the first catch logging flow, private Supabase Storage photo upload for catches, and partial offline catch draft sync.
 
 ## Already Built
 
@@ -43,6 +43,10 @@ The workspace now contains the documentation memory system, Expo SDK 54 app foun
 - Catch creation service in `services/catches/`.
 - Local catch draft persistence through AsyncStorage.
 - Local pending media queue for failed uploads and future background retry.
+- AsyncStorage-backed catch sync queue for submitted drafts.
+- Conflict-safe queued catch IDs so retrying a submitted local draft does not create duplicate catch rows.
+- NetInfo-based retry when connection returns while Log Catch is mounted.
+- Log Catch UI indicators for saved locally, pending sync, synced, and failed sync states.
 - Catch submission writes `catches` and updates `user_fishdex_entries`.
 - Private Storage bucket migration for `catch-originals` and `catch-thumbnails`.
 - Catch photo compression with `expo-image-manipulator`.
@@ -79,7 +83,7 @@ Everything below is not yet implemented in this workspace:
 - Catch journal list/detail/edit.
 - FishDex catch-driven discovery/progress updates.
 - Multi-photo media upload and background retry worker.
-- Local offline drafts.
+- Full offline database, offline FishDex catalog cache, and cross-device conflict resolution.
 - RevenueCat integration.
 - PostHog integration.
 - Sentry integration.
@@ -95,6 +99,7 @@ Current technical debt is mostly foundational absence rather than bad implementa
 - No lint/format tooling yet.
 - No CI pipeline.
 - Generated Supabase TypeScript types are pending; `types/database.ts` is currently hand-written.
+- Offline sync is intentionally partial and screen-scoped. It retries when Log Catch is mounted and network returns, but does not run as a true background task.
 - `npm install` reports 15 moderate transitive vulnerabilities after aligning to Expo SDK 54 and adding the local Expo tunnel helper. These were not force-fixed because forced audit fixes may break Expo compatibility.
 - Temporary web export verification output was written to `C:\tmp\fishquest-export-test`.
 - SDK 54 web export verification output was written to `C:\tmp\fishquest-sdk54-export-test`.
@@ -115,7 +120,7 @@ Current technical debt is mostly foundational absence rather than bad implementa
 2. Add initial smoke tests or verification checklist.
 3. Add FishDex search/sort polish if needed.
 4. Configure Apple and Google auth providers in Supabase and Apple/Google dashboards.
-5. Add catch list/detail/edit or add signed upload URL support through a backend/Edge Function.
+5. Add catch list/detail/edit or harden offline sync with a background worker and generated Supabase types.
 
 ## Pending Future Platforms and Services
 

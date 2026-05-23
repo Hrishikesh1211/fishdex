@@ -137,6 +137,7 @@ Public path constants live in `constants/routes.ts`. Expo route groups are inten
 Implemented state:
 
 - Supabase auth session: central `AuthProvider` and `useAuth` hook in `state/auth`.
+- Local catch draft and sync state: AsyncStorage-backed draft storage and catch sync queue in `services/catches/`.
 
 Recommended approach for future state:
 
@@ -205,7 +206,16 @@ MVP should support at least safe draft capture:
 - Conflicts are resolved conservatively.
 - Failed uploads are retryable.
 
-Do not promise complete offline sync until a queue, conflict model, and persistence strategy are implemented.
+Implemented partial offline support:
+
+- `saveCatchDraft` persists the active Log Catch form locally.
+- `enqueueCatchDraftForSync` stores submitted catches in an AsyncStorage sync queue before any network write.
+- Queued catches use stable UUIDs as `catches.id` values so retrying the same draft does not create duplicate catch rows.
+- `syncQueuedCatchDrafts` and `syncQueuedCatchDraftById` retry pending/failed catches and attached private photo uploads.
+- `@react-native-community/netinfo` is used to retry when connectivity returns while the Log Catch screen is mounted.
+- UI distinguishes saved locally, pending sync, synced, and failed sync states.
+
+This is not a full offline database. It is a simple, scoped MVP queue for one-device catch draft reliability.
 
 ## Future Backend Architecture
 
@@ -269,4 +279,5 @@ Expo React Native App
 - Real Supabase Auth behavior exists for email, Apple, and Google client flows.
 - Initial profile migration and RLS policies exist.
 - Read-only FishDex browsing exists with list, region filter, rarity display, locked states, and species detail route.
-- No catch journal, storage buckets, RevenueCat, PostHog, Sentry, Mapbox, or AI identification features exist yet.
+- Catch logging, private catch photo upload, and partial offline catch draft sync exist.
+- No catch list/detail/edit, RevenueCat, PostHog, Sentry, Mapbox, or AI identification features exist yet.

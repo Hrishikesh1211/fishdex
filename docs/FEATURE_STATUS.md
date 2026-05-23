@@ -30,11 +30,11 @@ Last audited: 2026-05-23
 | FishDex catalog | In progress | 65% | Species schema, seed data, auth | Search/sort polish and richer species media | Starter seed data, read service, list screen, region filter, locked states, rarity display, and detail route exist. |
 | FishDex progress | Planned | 5% | Catches, user_fishdex_entries | Progress service rules | Schema exists; discovery update logic is not implemented. |
 | Species detail | In progress | 55% | FishDex catalog, UI system | Rich media and catch-derived personal records | Detail route exists with rarity, locked state, field notes, habitat, range, and discovery status. |
-| Catch logging | In progress | 45% | Auth, catches table, FishDex species | Catch list/detail/edit and cloud photo upload | Log Catch form, local drafts, validation, submit, and FishDex progress update exist. |
+| Catch logging | In progress | 65% | Auth, catches table, FishDex species, Storage | Catch list/detail/edit | Log Catch form, local drafts, validation, queued submit, private photo upload, and FishDex progress update exist. |
 | Catch list | Not started | 0% | Catch logging | List service and UI | Personal journal timeline. |
 | Catch detail/edit | Not started | 0% | Catch list | None | Needed for trust and correction. |
 | Photo upload | In progress | 65% | Supabase Storage, catch logging | Signed upload URL backend and background retry worker | One photo can be compressed, uploaded to private original/thumbnail buckets, linked through `catch_media`, and retried after failure. Direct mobile upload is temporary until a backend exists. |
-| Offline drafts | In progress | 35% | Local storage strategy | Sync queue and conflict model | Log Catch can save/restore one local draft; full offline sync is pending. |
+| Offline drafts | In progress | 65% | AsyncStorage, NetInfo, catch service | Background sync and offline catalog cache | Log Catch can save/restore one draft, queue submitted catches locally, retry failed sync, and retry when connectivity returns while mounted. |
 | Trips | Planned | 0% | Catch journal | Product scope | Can follow MVP. |
 | Mapbox map/place memory | Planned | 0% | Location data, privacy rules, Mapbox token | Map product scope | Must feel atmospheric, not like a dense utility map. |
 | AI fish identification | Planned | 0% | Catch photos, secure backend, consent model | Provider/model decision | Assistive only; user confirmation required. |

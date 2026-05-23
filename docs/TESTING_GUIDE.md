@@ -54,7 +54,8 @@ Run before preview releases:
 - Submitted photo uploads to private Supabase Storage and is not exposed as a public URL.
 - Catch media metadata row is created with original path, thumbnail path, dimensions, MIME type, file size, and `uploaded` status.
 - Failed photo upload shows an error and retry action.
-- Offline draft survives app restart if implemented.
+- Offline draft survives app restart.
+- Offline submitted catch shows saved locally/pending sync state and syncs after reconnect.
 - Premium entitlement screen loads if implemented.
 - Sentry captures test error in non-production if configured.
 - PostHog sends allowed events if configured.
@@ -110,9 +111,9 @@ Current media upload behavior:
 
 ## Offline Testing
 
-Once offline drafts exist:
+Current offline draft behavior:
 
-- Current state: one Log Catch draft can be saved and restored locally.
+- Current state: one Log Catch draft can be saved/restored locally; submitted drafts are queued locally before network sync.
 - Create catch with no network.
 - Attach photo with no network.
 - Restart app before sync.
@@ -120,6 +121,9 @@ Once offline drafts exist:
 - Reconnect and sync.
 - Retry failed sync.
 - Verify no duplicate catch is created.
+- Verify UI states: saved locally, pending sync, synced, failed sync.
+- Verify the same queued catch uses the same `catches.id` across retries.
+- Verify reconnect retry works while the Log Catch screen is mounted.
 
 ## Release Testing
 

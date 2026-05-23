@@ -1,5 +1,6 @@
+import NetInfo from "@react-native-community/netinfo";
 import * as ImagePicker from "expo-image-picker";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Image, Pressable, StyleSheet, View } from "react-native";
 
 import { ShellScreen } from "../../components/shell";
@@ -16,11 +17,13 @@ import {
 import { colors, radius, spacing } from "../../constants/tokens";
 import {
   clearCatchDraft,
-  createCatch,
+  enqueueCatchDraftForSync,
   loadCatchDraft,
-  queuePendingCatchMediaUpload,
+  summarizeCatchSyncQueue,
   saveCatchDraft,
-  uploadCatchPhoto,
+  syncQueuedCatchDraftById,
+  syncQueuedCatchDrafts,
+  type CatchSyncSummary,
   type CatchDraft,
   type CatchDraftPhoto,
   type CatchPrivacy,
@@ -80,10 +83,11 @@ export default function LogCatchScreen() {
   const [message, setMessage] = useState<string | null>(null);
   const [photoUploadProgress, setPhotoUploadProgress] =
     useState<CatchPhotoUploadProgress | null>(null);
-  const [pendingPhotoRetry, setPendingPhotoRetry] = useState<{
-    catchId: string;
-    photo: CatchDraftPhoto;
-  } | null>(null);
+  const [syncSummary, setSyncSummary] = useState<CatchSyncSummary | null>(null);
+  const [syncingDrafts, setSyncingDrafts] = useState(false);
+  const [isOnline, setIsOnline] = useState<boolean | null>(null);
+  const [queuedDraftCatchId, setQueuedDraftCatchId] = useState<string | null>(null);
+  const syncInProgressRef = useRef(false);
 
   const selectedSpecies = useMemo(
     () => species.find((item) => item.id === form.speciesId) ?? null,
@@ -99,15 +103,18 @@ export default function LogCatchScreen() {
     setErrors([]);
 
     try {
-      const [catalog, draft] = await Promise.all([
+      const [catalog, draft, queueSummary] = await Promise.all([
         listFishdexCatalog(user.id),
         loadCatchDraft(user.id),
+        summarizeCatchSyncQueue(user.id),
       ]);
 
       setSpecies(catalog.species);
+      setSyncSummary(queueSummary);
 
       if (draft) {
         setForm(draftToForm(draft));
+        setQueuedDraftCatchId(draft.queuedCatchId ?? null);
         setMessage("Draft restored.");
       }
     } catch (error) {
@@ -120,6 +127,32 @@ export default function LogCatchScreen() {
   useEffect(() => {
     void loadFormData();
   }, [loadFormData]);
+
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      const online = Boolean(state.isConnected && state.isInternetReachable !== false);
+      setIsOnline(online);
+
+      if (online) {
+        void retrySyncQueue({ quiet: true });
+      }
+    });
+
+    void NetInfo.fetch().then((state) => {
+      const online = Boolean(state.isConnected && state.isInternetReachable !== false);
+      setIsOnline(online);
+
+      if (online) {
+        void retrySyncQueue({ quiet: true });
+      }
+    });
+
+    return unsubscribe;
+  }, [user]);
 
   async function handlePickPhoto() {
     setErrors([]);
@@ -144,8 +177,8 @@ export default function LogCatchScreen() {
     }
 
     const asset = result.assets[0];
-    setPendingPhotoRetry(null);
     setPhotoUploadProgress(null);
+    setQueuedDraftCatchId(null);
     updateForm({
       photo: {
         fileSize: asset.fileSize ?? null,
@@ -167,7 +200,7 @@ export default function LogCatchScreen() {
     setMessage(null);
 
     try {
-      await saveCatchDraft(user.id, formToDraft(form));
+      await saveCatchDraft(user.id, formToDraft(form, queuedDraftCatchId));
       setMessage("Draft saved on this device.");
     } catch (error) {
       setErrors([error instanceof Error ? error.message : "Unable to save draft."]);
@@ -187,8 +220,8 @@ export default function LogCatchScreen() {
     setPhotoUploadProgress(null);
 
     try {
-      if (pendingPhotoRetry) {
-        await retryPhotoUpload(pendingPhotoRetry);
+      if (queuedDraftCatchId) {
+        await retryQueuedDraft(queuedDraftCatchId);
         return;
       }
 
@@ -199,53 +232,43 @@ export default function LogCatchScreen() {
         return;
       }
 
-      const result = await createCatch({
-        caughtAt: parsed.caughtAt,
-        lengthUnit: parsed.lengthValue == null ? null : form.lengthUnit,
-        lengthValue: parsed.lengthValue,
-        notes: form.notes,
-        privacy: form.privacy,
-        speciesId: parsed.speciesId,
-        userId: user.id,
-        weightUnit: parsed.weightValue == null ? null : form.weightUnit,
-        weightValue: parsed.weightValue,
+      const queuedDraft = await enqueueCatchDraftForSync({
+        catchInput: {
+          caughtAt: parsed.caughtAt,
+          lengthUnit: parsed.lengthValue == null ? null : form.lengthUnit,
+          lengthValue: parsed.lengthValue,
+          notes: form.notes,
+          privacy: form.privacy,
+          speciesId: parsed.speciesId,
+          userId: user.id,
+          weightUnit: parsed.weightValue == null ? null : form.weightUnit,
+          weightValue: parsed.weightValue,
+        },
+        photo: form.photo,
       });
 
-      if (!result.ok) {
+      setQueuedDraftCatchId(queuedDraft.catchId);
+      await saveCatchDraft(user.id, formToDraft(form, queuedDraft.catchId));
+      await refreshSyncSummary();
+      setMessage("Catch saved locally. Syncing when connection allows.");
+
+      const result = await syncQueuedCatchDraftById(user.id, queuedDraft.catchId);
+
+      await refreshSyncSummary();
+
+      if (result.failed > 0) {
         setErrors(result.errors);
+        setMessage("Saved locally. Pending sync.");
         return;
-      }
-
-      const submittedPhoto = form.photo;
-
-      if (submittedPhoto) {
-        const uploadResult = await uploadCatchPhoto({
-          catchId: result.catchId,
-          onProgress: setPhotoUploadProgress,
-          photo: submittedPhoto,
-          userId: user.id,
-        });
-
-        if (!uploadResult.ok) {
-          await queuePendingCatchMediaUpload({
-            catchId: result.catchId,
-            photo: submittedPhoto,
-            userId: user.id,
-          });
-          setPendingPhotoRetry({ catchId: result.catchId, photo: submittedPhoto });
-          setErrors(uploadResult.errors);
-          setMessage("Catch saved, but the private photo upload needs a retry.");
-          return;
-        }
       }
 
       await clearCatchDraft(user.id);
       setForm(createInitialForm());
-      setPendingPhotoRetry(null);
+      setQueuedDraftCatchId(null);
       setMessage(
-        submittedPhoto
-          ? "Catch submitted. Photo uploaded privately and thumbnail prepared."
-          : "Catch submitted. FishDex progress updated.",
+        form.photo
+          ? "Catch synced. Photo uploaded privately and thumbnail prepared."
+          : "Catch synced. FishDex progress updated.",
       );
     } catch (error) {
       setErrors([error instanceof Error ? error.message : "Unable to submit catch."]);
@@ -254,53 +277,81 @@ export default function LogCatchScreen() {
     }
   }
 
-  async function handleRetryPhotoUpload() {
-    if (!pendingPhotoRetry) {
-      return;
-    }
-
-    setSubmitting(true);
-    setErrors([]);
-    setMessage(null);
-    setPhotoUploadProgress(null);
-
-    try {
-      await retryPhotoUpload(pendingPhotoRetry);
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  async function retryPhotoUpload(retry: { catchId: string; photo: CatchDraftPhoto }) {
+  async function retryQueuedDraft(catchId: string) {
     if (!user) {
       return;
     }
 
-    const uploadResult = await uploadCatchPhoto({
-      catchId: retry.catchId,
-      onProgress: setPhotoUploadProgress,
-      photo: retry.photo,
-      userId: user.id,
-    });
+    const result = await syncQueuedCatchDraftById(user.id, catchId);
+    await refreshSyncSummary();
 
-    if (!uploadResult.ok) {
-      await queuePendingCatchMediaUpload({
-        catchId: retry.catchId,
-        photo: retry.photo,
-        userId: user.id,
-      });
-      setErrors(uploadResult.errors);
-      setMessage("Photo upload failed again. Check connection and retry.");
+    if (result.failed > 0) {
+      setErrors(result.errors);
+      setMessage("Still saved locally. Sync failed and can be retried.");
       return;
     }
 
     await clearCatchDraft(user.id);
     setForm(createInitialForm());
-    setPendingPhotoRetry(null);
-    setMessage("Photo uploaded privately and linked to the saved catch.");
+    setQueuedDraftCatchId(null);
+    setMessage("Pending catch synced.");
   }
 
-  function updateForm(update: Partial<CatchForm>) {
+  async function retrySyncQueue({ quiet = false }: { quiet?: boolean } = {}) {
+    if (!user || syncInProgressRef.current) {
+      return;
+    }
+
+    syncInProgressRef.current = true;
+    setSyncingDrafts(true);
+
+    if (!quiet) {
+      setErrors([]);
+      setMessage("Retrying pending catch sync.");
+    }
+
+    try {
+      const result = await syncQueuedCatchDrafts(user.id);
+      await refreshSyncSummary();
+
+      if (result.failed > 0) {
+        if (!quiet) {
+          setErrors(result.errors);
+          setMessage("Some catches are still saved locally.");
+        }
+        return;
+      }
+
+      if (result.synced > 0) {
+        if (queuedDraftCatchId) {
+          await clearCatchDraft(user.id);
+          setForm(createInitialForm());
+          setQueuedDraftCatchId(null);
+        }
+
+        if (!quiet) {
+          setMessage("Pending catches synced.");
+        }
+      }
+    } catch (error) {
+      if (!quiet) {
+        setErrors([error instanceof Error ? error.message : "Unable to sync pending catches."]);
+      }
+    } finally {
+      syncInProgressRef.current = false;
+      setSyncingDrafts(false);
+    }
+  }
+
+  async function refreshSyncSummary() {
+    if (!user) {
+      return;
+    }
+
+    setSyncSummary(await summarizeCatchSyncQueue(user.id));
+  }
+
+function updateForm(update: Partial<CatchForm>) {
     setForm((current) => ({ ...current, ...update }));
   }
 
@@ -326,7 +377,7 @@ export default function LogCatchScreen() {
           <CatchActions
             saving={saving}
             submitting={submitting}
-            hasPendingPhotoRetry={Boolean(pendingPhotoRetry)}
+            hasPendingSync={Boolean(queuedDraftCatchId)}
             onSaveDraft={handleSaveDraft}
             onSubmitCatch={handleSubmitCatch}
           />
@@ -334,9 +385,16 @@ export default function LogCatchScreen() {
           <CatchFeedback
             errors={errors}
             message={message}
-            onRetryPhotoUpload={pendingPhotoRetry ? handleRetryPhotoUpload : undefined}
+            onRetrySync={syncSummary && syncSummary.total > 0 ? () => retrySyncQueue() : undefined}
             photoUploadProgress={photoUploadProgress}
-            retrying={submitting}
+            retrying={submitting || syncingDrafts}
+          />
+
+          <OfflineSyncStatus
+            isOnline={isOnline}
+            onRetry={() => retrySyncQueue()}
+            summary={syncSummary}
+            syncing={syncingDrafts}
           />
 
           <Card elevated>
@@ -386,8 +444,8 @@ export default function LogCatchScreen() {
                     <AppButton
                       label="Remove Photo"
                       onPress={() => {
-                        setPendingPhotoRetry(null);
                         setPhotoUploadProgress(null);
+                        setQueuedDraftCatchId(null);
                         updateForm({ photo: null });
                       }}
                       variant="ghost"
@@ -519,7 +577,7 @@ export default function LogCatchScreen() {
           <CatchActions
             saving={saving}
             submitting={submitting}
-            hasPendingPhotoRetry={Boolean(pendingPhotoRetry)}
+            hasPendingSync={Boolean(queuedDraftCatchId)}
             onSaveDraft={handleSaveDraft}
             onSubmitCatch={handleSubmitCatch}
           />
@@ -529,16 +587,93 @@ export default function LogCatchScreen() {
   );
 }
 
+function OfflineSyncStatus({
+  isOnline,
+  onRetry,
+  summary,
+  syncing,
+}: {
+  isOnline: boolean | null;
+  onRetry: () => void;
+  summary: CatchSyncSummary | null;
+  syncing: boolean;
+}) {
+  if (!summary || summary.total === 0) {
+    return (
+      <Card>
+        <View style={styles.stackTight}>
+          <SectionHeader
+            title="Draft Sync"
+            detail={isOnline === false ? "Offline" : "Synced"}
+          />
+          <AppText variant="bodySmall" tone={isOnline === false ? "secondary" : "accent"}>
+            {isOnline === false
+              ? "Drafts save locally while connection is unavailable."
+              : "No pending catches. Drafts are safe on this device."}
+          </AppText>
+        </View>
+      </Card>
+    );
+  }
+
+  const hasFailures = summary.failed > 0;
+  const statusLabel = syncing
+    ? "Syncing"
+    : hasFailures
+      ? "Failed sync"
+      : summary.pending > 0
+        ? "Pending sync"
+        : "Saved locally";
+
+  return (
+    <Card>
+      <View style={styles.stackTight}>
+        <SectionHeader title="Draft Sync" detail={statusLabel} />
+        <AppText variant="bodySmall" tone={hasFailures ? "danger" : "secondary"}>
+          {formatSyncSummary(summary, isOnline)}
+        </AppText>
+        {summary.latestError ? (
+          <AppText variant="bodySmall" tone="danger">
+            {summary.latestError}
+          </AppText>
+        ) : null}
+        <AppButton
+          disabled={syncing}
+          label={syncing ? "Syncing..." : "Retry Sync"}
+          onPress={onRetry}
+          variant="secondary"
+        />
+      </View>
+    </Card>
+  );
+}
+
+function formatSyncSummary(summary: CatchSyncSummary, isOnline: boolean | null) {
+  if (summary.failed > 0) {
+    return `${summary.failed} catch draft${summary.failed === 1 ? "" : "s"} failed to sync and remain saved locally.`;
+  }
+
+  if (summary.pending > 0) {
+    return `${summary.pending} catch draft${summary.pending === 1 ? "" : "s"} pending sync${isOnline === false ? " until connection returns" : ""}.`;
+  }
+
+  if (summary.syncing > 0) {
+    return "Syncing saved catch drafts.";
+  }
+
+  return "Catch drafts are saved locally.";
+}
+
 function CatchActions({
   onSaveDraft,
   onSubmitCatch,
-  hasPendingPhotoRetry,
+  hasPendingSync,
   saving,
   submitting,
 }: {
   onSaveDraft: () => void;
   onSubmitCatch: () => void;
-  hasPendingPhotoRetry: boolean;
+  hasPendingSync: boolean;
   saving: boolean;
   submitting: boolean;
 }) {
@@ -557,11 +692,11 @@ function CatchActions({
             disabled={saving || submitting}
             label={
               submitting
-                ? hasPendingPhotoRetry
-                  ? "Uploading Photo..."
+                ? hasPendingSync
+                  ? "Syncing..."
                   : "Submitting..."
-                : hasPendingPhotoRetry
-                  ? "Retry Photo Upload"
+                : hasPendingSync
+                  ? "Retry Sync"
                   : "Submit Catch"
             }
             onPress={onSubmitCatch}
@@ -575,17 +710,17 @@ function CatchActions({
 function CatchFeedback({
   errors,
   message,
-  onRetryPhotoUpload,
+  onRetrySync,
   photoUploadProgress,
   retrying,
 }: {
   errors: string[];
   message: string | null;
-  onRetryPhotoUpload?: () => void;
+  onRetrySync?: () => void;
   photoUploadProgress: CatchPhotoUploadProgress | null;
   retrying: boolean;
 }) {
-  if (errors.length === 0 && !message && !photoUploadProgress && !onRetryPhotoUpload) {
+  if (errors.length === 0 && !message && !photoUploadProgress && !onRetrySync) {
     return null;
   }
 
@@ -609,11 +744,11 @@ function CatchFeedback({
             total={100}
           />
         ) : null}
-        {onRetryPhotoUpload ? (
+        {onRetrySync ? (
           <AppButton
             disabled={retrying}
-            label={retrying ? "Retrying..." : "Retry Photo Upload"}
-            onPress={onRetryPhotoUpload}
+            label={retrying ? "Retrying..." : "Retry Sync"}
+            onPress={onRetrySync}
             variant="secondary"
           />
         ) : null}
@@ -744,9 +879,10 @@ function draftToForm(draft: CatchDraft): CatchForm {
   };
 }
 
-function formToDraft(form: CatchForm): CatchDraft {
+function formToDraft(form: CatchForm, queuedCatchId: string | null = null): CatchDraft {
   return {
     ...form,
+    queuedCatchId,
     updatedAt: new Date().toISOString(),
   };
 }

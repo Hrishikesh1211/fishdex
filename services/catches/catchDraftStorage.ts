@@ -19,6 +19,7 @@ export type CatchDraft = {
   notes: string;
   privacy: "private" | "unlisted" | "public";
   photo: CatchDraftPhoto | null;
+  queuedCatchId?: string | null;
   updatedAt: string;
 };
 

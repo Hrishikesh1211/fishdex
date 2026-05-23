@@ -5,6 +5,7 @@ export type LengthUnit = "in" | "cm";
 export type WeightUnit = "lb" | "oz" | "kg" | "g";
 
 export type CreateCatchInput = {
+  id?: string;
   userId: string;
   speciesId: string;
   caughtAt: string;
@@ -43,6 +44,7 @@ export async function createCatch(input: CreateCatchInput): Promise<CreateCatchR
     .from("catches")
     .insert({
       caught_at: input.caughtAt,
+      id: input.id,
       length_unit: input.lengthValue == null ? null : input.lengthUnit,
       length_value: input.lengthValue ?? null,
       notes: normalizeOptionalText(input.notes),
@@ -56,20 +58,42 @@ export async function createCatch(input: CreateCatchInput): Promise<CreateCatchR
     .single();
 
   if (error) {
+    const existingCatchId = input.id;
+
+    if (existingCatchId && isDuplicateCatchError(error, existingCatchId)) {
+      return { ok: true, catchId: existingCatchId };
+    }
+
     return { ok: false, errors: [error.message] };
   }
 
-  await updateFishdexEntry({
-    catchId: data.id,
-    lengthUnit: input.lengthUnit ?? null,
-    lengthValue: input.lengthValue ?? null,
-    speciesId: input.speciesId,
-    userId: input.userId,
-    weightUnit: input.weightUnit ?? null,
-    weightValue: input.weightValue ?? null,
-  });
+  try {
+    await updateFishdexEntry({
+      catchId: data.id,
+      lengthUnit: input.lengthUnit ?? null,
+      lengthValue: input.lengthValue ?? null,
+      speciesId: input.speciesId,
+      userId: input.userId,
+      weightUnit: input.weightUnit ?? null,
+      weightValue: input.weightValue ?? null,
+    });
+  } catch (error) {
+    return {
+      ok: false,
+      errors: [error instanceof Error ? error.message : "Unable to update FishDex progress."],
+    };
+  }
 
   return { ok: true, catchId: data.id };
+}
+
+function isDuplicateCatchError(error: { code?: string; message?: string }, catchId?: string) {
+  return Boolean(
+    catchId &&
+      (error.code === "23505" ||
+        error.message?.toLowerCase().includes("duplicate key") ||
+        error.message?.toLowerCase().includes("already exists")),
+  );
 }
 
 function validateCreateCatchInput(input: CreateCatchInput) {

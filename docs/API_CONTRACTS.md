@@ -14,7 +14,7 @@ Implemented:
 - Apple and Google provider helpers in `services/auth/oauth.ts`.
 - Profile upsert helper in `services/profiles/profileService.ts`.
 - Read-only FishDex catalog/detail service in `services/fishdex/fishdexService.ts`.
-- Catch creation, local draft persistence, pending local media queue helpers, and private catch photo upload in `services/catches/`.
+- Catch creation, local draft persistence, pending local media queue helpers, private catch photo upload, and offline catch sync queue in `services/catches/`.
 - Minimal typed Supabase database contract in `types/database.ts`.
 - Database tables for profiles, regions, species, catches, media metadata, FishDex entries, signals, subscriptions, AI classifications, and audit logs.
 
@@ -138,6 +138,10 @@ Current catalog responses include region filter data, rarity, discovery/locked s
 - `saveCatchDraft(userId, draft)`
 - `loadCatchDraft(userId)`
 - `clearCatchDraft(userId)`
+- `enqueueCatchDraftForSync({ catchInput, photo })`
+- `syncQueuedCatchDrafts(userId)`
+- `syncQueuedCatchDraftById(userId, catchId)`
+- `summarizeCatchSyncQueue(userId)`
 - `queuePendingCatchMediaUpload({ userId, catchId, photo })`
 - `updateCatch()`
 - `softDeleteCatch()`
@@ -151,6 +155,13 @@ Current `createCatch` behavior:
 - Validates required species, date/time, privacy, notes length, and non-negative measurements.
 - Updates or creates `user_fishdex_entries` for catch count and best measurements.
 - Photo upload is orchestrated by `uploadCatchPhoto` after the catch row exists.
+- Accepts an optional stable `id` for queued offline submissions. Duplicate ID retries are treated as already-synced catch rows to avoid duplicate catches.
+
+Current offline sync behavior:
+
+- Log Catch saves submitted catches to an AsyncStorage queue before network sync.
+- Pending/failed queue items can be retried manually or when NetInfo reports connectivity returning while the screen is mounted.
+- This is a single-device MVP queue, not a full offline database.
 
 ### Media
 

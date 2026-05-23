@@ -18,6 +18,17 @@ export {
   type CatchPhotoUploadStage,
   type UploadCatchPhotoResult,
 } from "./catchMediaUploadService";
+export {
+  enqueueCatchDraftForSync,
+  loadQueuedCatchDrafts,
+  summarizeCatchSyncQueue,
+  syncQueuedCatchDraftById,
+  syncQueuedCatchDrafts,
+  type CatchSyncSummary,
+  type QueuedCatchDraft,
+  type QueuedCatchSyncStatus,
+  type SyncQueuedCatchDraftsResult,
+} from "./catchSyncQueue";
 export { createCatch } from "./catchService";
 export type {
   CatchPrivacy,

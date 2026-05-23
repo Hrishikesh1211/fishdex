@@ -1,0 +1,90 @@
+# FishQuest Security Rules
+
+Last audited: 2026-05-22
+
+## Audit Status
+
+No security-sensitive implementation exists in this workspace at audit time. These rules govern future implementation.
+
+## Secret Management
+
+- Never commit secrets.
+- Never expose service-role keys in the mobile app.
+- Use environment variables and EAS secrets for build-time sensitive values.
+- Public mobile keys must be protected by backend authorization rules.
+- Keep `.env.example` current without real secrets.
+
+## Auth Rules
+
+- Supabase Auth is the source of user identity.
+- Route guards are not security boundaries.
+- RLS must enforce ownership.
+- Sign out must clear sensitive local state.
+- Account deletion must be supported before production.
+
+## Upload Security
+
+- Catch photos are private by default.
+- Storage paths should include user ownership.
+- Users may only read/write their own private media unless explicit sharing exists.
+- Validate file type and size before upload.
+- Avoid exposing permanent public URLs for private media.
+- Use signed URLs when needed.
+
+## API Security
+
+- Normalize errors before displaying them.
+- Do not leak backend internals to users.
+- Validate all user input before writes.
+- Use Edge Functions for privileged operations.
+- Never call privileged operations directly from the client with service credentials.
+
+## RLS Rules
+
+Every user-owned table must have RLS enabled.
+
+Minimum policy expectations:
+
+- Users can select their own records.
+- Users can insert records only for themselves.
+- Users can update only their own records.
+- Users can delete only their own records when deletion is allowed.
+- Public catalog tables are read-only to clients unless admin tools exist.
+
+## Storage Privacy
+
+- Use private buckets for catch media.
+- Use explicit policies for object ownership.
+- Delete or anonymize media according to account deletion policy.
+- Do not send precise private media metadata to analytics.
+
+## Mobile Security
+
+- Do not store secrets in app code.
+- Do not log tokens.
+- Do not include sensitive data in crash reports.
+- Treat precise location and catch notes as private.
+- Avoid putting sensitive data in route params.
+- Keep dependencies current and remove unused packages.
+
+## Admin Security
+
+- Admin tools must be separate from the mobile client.
+- Admin access must use strong authentication.
+- Admin actions should be logged.
+- Service-role keys belong only in trusted backend environments.
+
+## Logging and Audit Rules
+
+- Log operational errors without sensitive payloads.
+- Scrub tokens, private notes, precise coordinates, and media URLs.
+- Track product analytics at event level, not private-content level.
+- Document any new analytics event that uses user data.
+
+## Compliance Considerations
+
+- Provide privacy policy and terms before production.
+- Provide account deletion.
+- Support data export or deletion workflows as required.
+- Follow App Store guidance for Sign In with Apple and subscriptions.
+

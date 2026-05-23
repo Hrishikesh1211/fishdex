@@ -1,0 +1,120 @@
+{
+  "colors": {
+    "background": "#071311",
+    "backgroundRaised": "#0B1B18",
+    "surface": "#102420",
+    "surfaceElevated": "#16312B",
+    "surfaceMuted": "#203A34",
+    "border": "#29463F",
+    "borderStrong": "#3D6258",
+    "textPrimary": "#F2F5EF",
+    "textSecondary": "#B9C9C0",
+    "textMuted": "#80978D",
+    "accent": "#6EC6A6",
+    "accentSoft": "#1D4A3D",
+    "accentWarm": "#D8B66B",
+    "success": "#7CCB91",
+    "warning": "#D8B66B",
+    "danger": "#E0786E",
+    "focus": "#A8DDC5",
+    "scrim": "rgba(2, 8, 7, 0.72)"
+  },
+  "rarity": {
+    "common": "#9DB4AA",
+    "uncommon": "#6EC6A6",
+    "rare": "#7CA8D8",
+    "epic": "#B99AE6",
+    "legendary": "#D8B66B",
+    "mythic": "#E58F7A"
+  },
+  "spacing": {
+    "0": "0px",
+    "1": "4px",
+    "2": "8px",
+    "3": "12px",
+    "4": "16px",
+    "5": "20px",
+    "6": "24px",
+    "8": "32px",
+    "10": "40px",
+    "12": "48px",
+    "16": "64px",
+    "20": "80px"
+  },
+  "typography": {
+    "fontFamily": {
+      "body": "System",
+      "display": "System",
+      "mono": "System"
+    },
+    "sizes": {
+      "caption": "12px",
+      "bodySmall": "14px",
+      "body": "16px",
+      "bodyLarge": "18px",
+      "heading": "22px",
+      "title": "28px",
+      "display": "36px"
+    },
+    "lineHeights": {
+      "caption": "16px",
+      "bodySmall": "20px",
+      "body": "24px",
+      "bodyLarge": "28px",
+      "heading": "30px",
+      "title": "36px",
+      "display": "44px"
+    },
+    "weights": {
+      "regular": "400",
+      "medium": "500",
+      "semibold": "600",
+      "bold": "700"
+    }
+  },
+  "radius": {
+    "none": "0px",
+    "xs": "4px",
+    "sm": "6px",
+    "md": "8px",
+    "lg": "12px",
+    "xl": "16px",
+    "full": "999px"
+  },
+  "shadows": {
+    "native": {
+      "soft": {
+        "shadowColor": "#020807",
+        "shadowOpacity": 0.22,
+        "shadowRadius": 14,
+        "shadowOffset": {
+          "width": 0,
+          "height": 8
+        },
+        "elevation": 4
+      },
+      "lifted": {
+        "shadowColor": "#020807",
+        "shadowOpacity": 0.28,
+        "shadowRadius": 24,
+        "shadowOffset": {
+          "width": 0,
+          "height": 14
+        },
+        "elevation": 8
+      }
+    },
+    "web": {
+      "soft": "0 8px 24px rgba(2, 8, 7, 0.22)",
+      "lifted": "0 14px 38px rgba(2, 8, 7, 0.28)"
+    }
+  },
+  "motion": {
+    "duration": {
+      "instant": "0ms",
+      "fast": "120ms",
+      "base": "180ms",
+      "slow": "280ms"
+    }
+  }
+}

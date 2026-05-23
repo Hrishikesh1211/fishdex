@@ -1,0 +1,18 @@
+{
+  "expo": {
+    "name": "FishQuest",
+    "slug": "fishquest",
+    "scheme": "fishquest",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "platforms": ["ios", "android", "web"],
+    "ios": {
+      "supportsTablet": true
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

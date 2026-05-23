@@ -4,7 +4,7 @@ Last audited: 2026-05-23
 
 ## Audit Status
 
-Security-sensitive auth implementation now exists. Supabase Auth sessions are centralized and native session persistence uses SecureStore.
+Security-sensitive auth implementation and private catch photo upload now exist. Supabase Auth sessions are centralized, native session persistence uses SecureStore, and catch media is stored in private Supabase Storage buckets.
 
 ## Secret Management
 
@@ -32,6 +32,9 @@ Security-sensitive auth implementation now exists. Supabase Auth sessions are ce
 - Validate file type and size before upload.
 - Avoid exposing permanent public URLs for private media.
 - Use signed URLs when needed.
+- Current app upload is a temporary authenticated direct upload through the anon client plus Storage RLS because no backend/Edge Function exists yet.
+- Use signed upload URLs when the backend boundary is added.
+- Client image compression prepares JPEG derivatives and helps reduce EXIF exposure, but EXIF/location privacy must be reviewed before camera-first workflows ship.
 
 ## API Security
 
@@ -65,6 +68,9 @@ Minimum policy expectations:
 
 - Use private buckets for catch media.
 - Use explicit policies for object ownership.
+- Current private buckets are `catch-originals` and `catch-thumbnails`.
+- Catch media object paths must begin with the owning user ID.
+- Storage policies allow authenticated users to manage only objects whose first folder matches `auth.uid()`.
 - Delete or anonymize media according to account deletion policy.
 - Do not send precise private media metadata to analytics.
 
@@ -77,7 +83,7 @@ Minimum policy expectations:
 - Avoid putting sensitive data in route params.
 - Keep dependencies current and remove unused packages.
 - Current catch logging does not collect exact latitude/longitude.
-- Selected catch photos remain local until signed private Storage upload is implemented.
+- Selected catch photos are compressed and uploaded to private Storage after catch submission.
 
 ## Admin Security
 

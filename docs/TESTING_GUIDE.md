@@ -51,8 +51,9 @@ Run before preview releases:
 - Log Catch validates missing species, invalid date/time, negative measurements, and long notes.
 - Log Catch can submit a catch and FishDex progress updates after refresh/navigation.
 - Photo picker can attach one local photo to a draft.
-- Submitted photo is queued locally for future upload and is not exposed as a public URL.
-- Photo selection works in Log Catch; cloud upload remains pending.
+- Submitted photo uploads to private Supabase Storage and is not exposed as a public URL.
+- Catch media metadata row is created with original path, thumbnail path, dimensions, MIME type, file size, and `uploaded` status.
+- Failed photo upload shows an error and retry action.
 - Offline draft survives app restart if implemented.
 - Premium entitlement screen loads if implemented.
 - Sentry captures test error in non-production if configured.
@@ -94,15 +95,17 @@ Run before preview releases:
 
 ## Upload Testing
 
-Once media upload exists:
+Current media upload behavior:
 
-- Current state: picker and local pending upload queue exist; Supabase Storage upload does not.
+- Current state: picker, compression, private Storage upload, thumbnail generation, media metadata insert, and same-session retry exist.
 - Upload one catch photo.
-- Upload multiple photos if supported.
 - Cancel photo picker.
+- Try a non-image file if the platform picker permits it; it should be rejected.
+- Try a source image over 12 MB; it should be rejected before upload when file size is available.
 - Retry failed upload.
 - Test weak network.
-- Confirm private storage access.
+- Confirm private storage access: objects should exist under `{user_id}/{catch_id}/...` in `catch-originals` and `catch-thumbnails`, and buckets should not be public.
+- Confirm another user cannot read the object path or `catch_media` row.
 - Confirm deleted catch removes or detaches media according to policy.
 
 ## Offline Testing

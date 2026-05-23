@@ -11,6 +11,7 @@ Implemented migrations:
 - `supabase/migrations/202605230001_create_profiles.sql`
 - `supabase/migrations/202605230002_create_core_schema.sql`
 - `supabase/migrations/202605230003_seed_starter_catalog.sql`
+- `supabase/migrations/202605230004_create_catch_media_storage.sql`
 
 Implemented local database type contract:
 
@@ -161,8 +162,14 @@ Key columns:
 - `media_type text`
 - `storage_bucket text`
 - `storage_path text`
+- `thumbnail_storage_bucket text`
+- `thumbnail_storage_path text`
 - `width integer`
 - `height integer`
+- `thumbnail_width integer`
+- `thumbnail_height integer`
+- `mime_type text`
+- `file_size_bytes integer`
 - `upload_status text`
 - `created_at`, `updated_at`, `deleted_at`
 
@@ -170,12 +177,22 @@ RLS:
 
 - Users can read and update their own media metadata.
 - Users can insert media metadata only for catches they own.
-- Storage bucket policies must mirror this ownership model when upload is implemented.
+- Private Storage bucket policies mirror this ownership model.
+
+Storage:
+
+- `catch-originals`: private bucket for compressed full-size catch photos, max 8 MB.
+- `catch-thumbnails`: private bucket for generated catch thumbnails, max 1 MB.
+- Object paths must be scoped as `{user_id}/{catch_id}/{media_id}.jpg`.
+- Authenticated users can select, insert, update, and delete only Storage objects whose first path segment matches their `auth.uid()`.
+- The mobile app currently performs direct authenticated uploads with the anon key plus Storage RLS. Signed upload URLs should replace this path once a trusted backend or Edge Function exists.
 
 Current app behavior:
 
-- Photo picker stores local image metadata in drafts and a local pending upload queue.
-- No `catch_media` rows are inserted until signed/private Storage upload is implemented.
+- Photo picker stores local image metadata in drafts.
+- On submit, `services/catches/uploadCatchPhoto` compresses the image, uploads a private original and thumbnail, and inserts the `catch_media` row.
+- Failed uploads are queued locally and can be retried from the Log Catch screen.
+- EXIF/location metadata privacy remains a concern. The current client compression path prepares JPEG derivatives and should be reviewed before accepting camera EXIF-heavy workflows.
 
 ### `user_fishdex_entries`
 
@@ -298,6 +315,7 @@ Implemented indexes cover:
 - Species-region joins.
 - User catch timeline and user/species catch lookups.
 - Catch media by catch, user, and storage path.
+- Catch media by thumbnail storage path.
 - User FishDex progress by discovery time.
 - Active signals by region/species.
 - User subscription state and RevenueCat customer lookup.
@@ -315,9 +333,13 @@ Current policy model:
 - Server-owned writes: `subscriptions`, `ai_classifications`, `signals`, catalog tables, and `audit_logs` are written only by trusted backend/admin workflows.
 - Client route guards are UX only. Postgres RLS is the security boundary.
 
+Implemented Storage policy work:
+
+- Private buckets exist for `catch-originals` and `catch-thumbnails`.
+- Storage object policies require authenticated ownership by the first folder segment.
+
 Future policy work:
 
-- Add Supabase Storage policies for private catch media.
 - Add public/shared catch policies only after product privacy rules are finalized.
 - Add admin role helpers if an admin dashboard is built.
 - Add deletion/anonymization procedures for account deletion.
@@ -334,7 +356,7 @@ Future policy work:
 
 - The core schema migration has been applied in the current Supabase project, per user confirmation.
 - Generated Supabase database types are pending.
-- Supabase Storage bucket and storage RLS policies are pending.
-- `catch_media` upload/write flow is pending signed private Storage support.
+- Supabase Storage bucket and storage RLS policies are implemented in migration `202605230004_create_catch_media_storage.sql`.
+- `catch_media` upload/write flow is implemented with a temporary direct authenticated upload. Signed upload URL support remains pending until a backend/Edge Function exists.
 - Starter seed species/region data has been applied in the current Supabase project, per user confirmation.
 - Account deletion/anonymization routines are pending.

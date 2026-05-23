@@ -1,6 +1,6 @@
 # FishQuest Deployment
 
-Last audited: 2026-05-22
+Last audited: 2026-05-23
 
 ## Audit Status
 
@@ -125,8 +125,11 @@ Dashboard steps:
 6. Go to Authentication > Providers and configure Email, Apple, and Google for the target environment.
 7. Go to Authentication > URL Configuration and add the Expo/native redirect URLs required by the implemented auth flow. The app generates its OAuth callback with `Linking.createURL("callback")`.
 8. Apply `supabase/migrations/202605230001_create_profiles.sql` before testing profile sync.
-9. Create private Storage buckets only when upload flows are implemented.
-10. Enable and verify RLS policies before any user-owned tables are used by the app.
+9. Apply `supabase/migrations/202605230002_create_core_schema.sql` before testing FishDex/catch data.
+10. Apply `supabase/migrations/202605230003_seed_starter_catalog.sql` before testing FishDex browsing.
+11. Apply `supabase/migrations/202605230004_create_catch_media_storage.sql` before testing photo upload.
+12. Verify private Storage buckets `catch-originals` and `catch-thumbnails` exist and are not public.
+13. Enable and verify RLS policies before any user-owned tables or Storage objects are used by the app.
 
 ## Staging and Production Strategy
 
@@ -149,6 +152,12 @@ npm run typecheck
 npm run ios
 npm run android
 npm run web
+```
+
+After adding native Expo packages, restart Expo Go with a clean server if Metro behaves oddly:
+
+```bash
+npm run start -- --clear
 ```
 
 Verified command:

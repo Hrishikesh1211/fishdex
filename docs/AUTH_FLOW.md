@@ -108,7 +108,7 @@ Remaining setup:
 - RLS is mandatory for user-owned data.
 - Client route guards are UX only.
 - The database must enforce ownership.
-- Storage buckets for catch photos should be private by default.
+- Storage buckets for catch photos are private by default.
 - Admin or service-role operations must never be exposed to mobile clients.
 
 ## Implemented Auth Preparation
@@ -129,7 +129,8 @@ https://sbbotzergiwoxutzbnub.supabase.co
 
 - Supabase dashboard provider configuration must be completed for Apple and Google.
 - The core schema migration is applied in the current Supabase project, per user confirmation. Apply it to any future staging/production projects before data features depend on those tables.
-- Storage bucket policies are not implemented yet.
+- Private Storage buckets and owner-scoped object policies exist for catch photos.
+- Current photo upload uses authenticated direct Storage upload because no backend/Edge Function exists yet; signed upload URLs remain the preferred future backend pattern.
 - No account deletion flow.
 - No password reset flow.
 - No analytics or Sentry user context binding yet.

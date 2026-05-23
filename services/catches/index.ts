@@ -10,6 +10,14 @@ export {
   queuePendingCatchMediaUpload,
   type PendingCatchMediaUpload,
 } from "./catchMediaQueue";
+export {
+  CATCH_ORIGINALS_BUCKET,
+  CATCH_THUMBNAILS_BUCKET,
+  uploadCatchPhoto,
+  type CatchPhotoUploadProgress,
+  type CatchPhotoUploadStage,
+  type UploadCatchPhotoResult,
+} from "./catchMediaUploadService";
 export { createCatch } from "./catchService";
 export type {
   CatchPrivacy,

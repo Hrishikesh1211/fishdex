@@ -10,6 +10,7 @@ import {
   Card,
   EmptyState,
   LoadingState,
+  ProgressPill,
   RarityBadge,
 } from "../../components/ui";
 import { colors, radius, spacing } from "../../constants/tokens";
@@ -19,9 +20,11 @@ import {
   loadCatchDraft,
   queuePendingCatchMediaUpload,
   saveCatchDraft,
+  uploadCatchPhoto,
   type CatchDraft,
   type CatchDraftPhoto,
   type CatchPrivacy,
+  type CatchPhotoUploadProgress,
   type LengthUnit,
   type WeightUnit,
 } from "../../services/catches";
@@ -75,6 +78,12 @@ export default function LogCatchScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [message, setMessage] = useState<string | null>(null);
+  const [photoUploadProgress, setPhotoUploadProgress] =
+    useState<CatchPhotoUploadProgress | null>(null);
+  const [pendingPhotoRetry, setPendingPhotoRetry] = useState<{
+    catchId: string;
+    photo: CatchDraftPhoto;
+  } | null>(null);
 
   const selectedSpecies = useMemo(
     () => species.find((item) => item.id === form.speciesId) ?? null,
@@ -135,9 +144,13 @@ export default function LogCatchScreen() {
     }
 
     const asset = result.assets[0];
+    setPendingPhotoRetry(null);
+    setPhotoUploadProgress(null);
     updateForm({
       photo: {
+        fileSize: asset.fileSize ?? null,
         height: asset.height,
+        mimeType: asset.mimeType ?? null,
         uri: asset.uri,
         width: asset.width,
       },
@@ -171,8 +184,14 @@ export default function LogCatchScreen() {
     setSubmitting(true);
     setErrors([]);
     setMessage(null);
+    setPhotoUploadProgress(null);
 
     try {
+      if (pendingPhotoRetry) {
+        await retryPhotoUpload(pendingPhotoRetry);
+        return;
+      }
+
       const parsed = parseFormForSubmit(form);
 
       if (!parsed.ok) {
@@ -197,19 +216,35 @@ export default function LogCatchScreen() {
         return;
       }
 
-      if (form.photo) {
-        await queuePendingCatchMediaUpload({
+      const submittedPhoto = form.photo;
+
+      if (submittedPhoto) {
+        const uploadResult = await uploadCatchPhoto({
           catchId: result.catchId,
-          photo: form.photo,
+          onProgress: setPhotoUploadProgress,
+          photo: submittedPhoto,
           userId: user.id,
         });
+
+        if (!uploadResult.ok) {
+          await queuePendingCatchMediaUpload({
+            catchId: result.catchId,
+            photo: submittedPhoto,
+            userId: user.id,
+          });
+          setPendingPhotoRetry({ catchId: result.catchId, photo: submittedPhoto });
+          setErrors(uploadResult.errors);
+          setMessage("Catch saved, but the private photo upload needs a retry.");
+          return;
+        }
       }
 
       await clearCatchDraft(user.id);
       setForm(createInitialForm());
+      setPendingPhotoRetry(null);
       setMessage(
-        form.photo
-          ? "Catch submitted. Photo is queued locally until private uploads are enabled."
+        submittedPhoto
+          ? "Catch submitted. Photo uploaded privately and thumbnail prepared."
           : "Catch submitted. FishDex progress updated.",
       );
     } catch (error) {
@@ -217,6 +252,52 @@ export default function LogCatchScreen() {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  async function handleRetryPhotoUpload() {
+    if (!pendingPhotoRetry) {
+      return;
+    }
+
+    setSubmitting(true);
+    setErrors([]);
+    setMessage(null);
+    setPhotoUploadProgress(null);
+
+    try {
+      await retryPhotoUpload(pendingPhotoRetry);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function retryPhotoUpload(retry: { catchId: string; photo: CatchDraftPhoto }) {
+    if (!user) {
+      return;
+    }
+
+    const uploadResult = await uploadCatchPhoto({
+      catchId: retry.catchId,
+      onProgress: setPhotoUploadProgress,
+      photo: retry.photo,
+      userId: user.id,
+    });
+
+    if (!uploadResult.ok) {
+      await queuePendingCatchMediaUpload({
+        catchId: retry.catchId,
+        photo: retry.photo,
+        userId: user.id,
+      });
+      setErrors(uploadResult.errors);
+      setMessage("Photo upload failed again. Check connection and retry.");
+      return;
+    }
+
+    await clearCatchDraft(user.id);
+    setForm(createInitialForm());
+    setPendingPhotoRetry(null);
+    setMessage("Photo uploaded privately and linked to the saved catch.");
   }
 
   function updateForm(update: Partial<CatchForm>) {
@@ -245,11 +326,18 @@ export default function LogCatchScreen() {
           <CatchActions
             saving={saving}
             submitting={submitting}
+            hasPendingPhotoRetry={Boolean(pendingPhotoRetry)}
             onSaveDraft={handleSaveDraft}
             onSubmitCatch={handleSubmitCatch}
           />
 
-          <CatchFeedback errors={errors} message={message} />
+          <CatchFeedback
+            errors={errors}
+            message={message}
+            onRetryPhotoUpload={pendingPhotoRetry ? handleRetryPhotoUpload : undefined}
+            photoUploadProgress={photoUploadProgress}
+            retrying={submitting}
+          />
 
           <Card elevated>
             <View style={styles.stack}>
@@ -293,18 +381,22 @@ export default function LogCatchScreen() {
                       Photo selected
                     </AppText>
                     <AppText variant="bodySmall" tone="secondary">
-                      It will stay local until the signed private upload flow is added.
+                      It will be compressed, uploaded privately, and linked to this catch.
                     </AppText>
                     <AppButton
                       label="Remove Photo"
-                      onPress={() => updateForm({ photo: null })}
+                      onPress={() => {
+                        setPendingPhotoRetry(null);
+                        setPhotoUploadProgress(null);
+                        updateForm({ photo: null });
+                      }}
                       variant="ghost"
                     />
                   </View>
                 </View>
               ) : (
                 <AppText variant="bodySmall" tone="secondary">
-                  Add one image now; cloud upload will be enabled with private Storage policies.
+                  Add one image. Originals stay private by default; thumbnails are prepared for future previews.
                 </AppText>
               )}
               <AppButton label={form.photo ? "Change Photo" : "Choose Photo"} onPress={handlePickPhoto} variant="secondary" />
@@ -427,6 +519,7 @@ export default function LogCatchScreen() {
           <CatchActions
             saving={saving}
             submitting={submitting}
+            hasPendingPhotoRetry={Boolean(pendingPhotoRetry)}
             onSaveDraft={handleSaveDraft}
             onSubmitCatch={handleSubmitCatch}
           />
@@ -439,11 +532,13 @@ export default function LogCatchScreen() {
 function CatchActions({
   onSaveDraft,
   onSubmitCatch,
+  hasPendingPhotoRetry,
   saving,
   submitting,
 }: {
   onSaveDraft: () => void;
   onSubmitCatch: () => void;
+  hasPendingPhotoRetry: boolean;
   saving: boolean;
   submitting: boolean;
 }) {
@@ -460,7 +555,15 @@ function CatchActions({
           />
           <AppButton
             disabled={saving || submitting}
-            label={submitting ? "Submitting..." : "Submit Catch"}
+            label={
+              submitting
+                ? hasPendingPhotoRetry
+                  ? "Uploading Photo..."
+                  : "Submitting..."
+                : hasPendingPhotoRetry
+                  ? "Retry Photo Upload"
+                  : "Submit Catch"
+            }
             onPress={onSubmitCatch}
           />
         </View>
@@ -469,8 +572,20 @@ function CatchActions({
   );
 }
 
-function CatchFeedback({ errors, message }: { errors: string[]; message: string | null }) {
-  if (errors.length === 0 && !message) {
+function CatchFeedback({
+  errors,
+  message,
+  onRetryPhotoUpload,
+  photoUploadProgress,
+  retrying,
+}: {
+  errors: string[];
+  message: string | null;
+  onRetryPhotoUpload?: () => void;
+  photoUploadProgress: CatchPhotoUploadProgress | null;
+  retrying: boolean;
+}) {
+  if (errors.length === 0 && !message && !photoUploadProgress && !onRetryPhotoUpload) {
     return null;
   }
 
@@ -487,9 +602,41 @@ function CatchFeedback({ errors, message }: { errors: string[]; message: string 
             {message}
           </AppText>
         ) : null}
+        {photoUploadProgress ? (
+          <ProgressPill
+            current={photoUploadProgress.percent}
+            label={formatUploadStage(photoUploadProgress.stage)}
+            total={100}
+          />
+        ) : null}
+        {onRetryPhotoUpload ? (
+          <AppButton
+            disabled={retrying}
+            label={retrying ? "Retrying..." : "Retry Photo Upload"}
+            onPress={onRetryPhotoUpload}
+            variant="secondary"
+          />
+        ) : null}
       </View>
     </Card>
   );
+}
+
+function formatUploadStage(stage: CatchPhotoUploadProgress["stage"]) {
+  switch (stage) {
+    case "validating":
+      return "Validating photo";
+    case "compressing":
+      return "Compressing photo";
+    case "uploading-original":
+      return "Uploading private original";
+    case "uploading-thumbnail":
+      return "Preparing thumbnail";
+    case "saving-metadata":
+      return "Saving media record";
+    case "complete":
+      return "Upload complete";
+  }
 }
 
 function SectionHeader({ detail, title }: { detail: string; title: string }) {

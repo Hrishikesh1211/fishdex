@@ -20,7 +20,7 @@ Last audited: 2026-05-23
 | Design tokens | Complete | 100% | NativeWind or constants | None | Colors, spacing, typography, radius, shadows, rarity, and motion tokens exist. |
 | Environment structure | Complete | 100% | Expo public env | Real keys not committed | `.env.example` documents app env, Supabase URL, anon key, and service-role restrictions. |
 | Supabase client | Complete | 100% | Env vars, package install | Real anon key required at runtime | Centralized lazy client exists in `lib/supabase` with SecureStore-backed native session persistence. |
-| Database migrations | In progress | 60% | Supabase project | Generate types | Initial production schema and starter catalog seed migrations exist and have been applied in the current Supabase project. Storage policies and generated types are pending. |
+| Database migrations | In progress | 75% | Supabase project | Generate types | Initial production schema, starter catalog seed, and private catch media Storage migrations exist. Apply new migrations to each Supabase environment before testing. |
 | Auth session provider | Complete | 100% | Supabase client, SecureStore | None | Central `AuthProvider` restores sessions, listens to auth state, and exposes auth actions. |
 | Auth routes | In progress | 80% | Expo Router navigation, auth provider | Password reset/account deletion | Welcome, Sign In, Create Account, and callback routes are wired to auth behavior. |
 | Apple Sign In | In progress | 60% | Auth foundation, Apple config | Apple developer/Supabase provider setup | Native client flow implemented with nonce; external provider setup still required. |
@@ -33,7 +33,7 @@ Last audited: 2026-05-23
 | Catch logging | In progress | 45% | Auth, catches table, FishDex species | Catch list/detail/edit and cloud photo upload | Log Catch form, local drafts, validation, submit, and FishDex progress update exist. |
 | Catch list | Not started | 0% | Catch logging | List service and UI | Personal journal timeline. |
 | Catch detail/edit | Not started | 0% | Catch list | None | Needed for trust and correction. |
-| Photo upload | In progress | 15% | Supabase Storage | Storage bucket, signed upload flow, and policies | Photo picker and local pending upload queue exist; no cloud upload yet. |
+| Photo upload | In progress | 65% | Supabase Storage, catch logging | Signed upload URL backend and background retry worker | One photo can be compressed, uploaded to private original/thumbnail buckets, linked through `catch_media`, and retried after failure. Direct mobile upload is temporary until a backend exists. |
 | Offline drafts | In progress | 35% | Local storage strategy | Sync queue and conflict model | Log Catch can save/restore one local draft; full offline sync is pending. |
 | Trips | Planned | 0% | Catch journal | Product scope | Can follow MVP. |
 | Mapbox map/place memory | Planned | 0% | Location data, privacy rules, Mapbox token | Map product scope | Must feel atmospheric, not like a dense utility map. |

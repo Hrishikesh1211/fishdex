@@ -2,6 +2,15 @@
 
 ## 2026-05-23
 
+### Secure Fish Photo Upload Added
+
+- Added `expo-image-manipulator` for client-side catch photo compression and thumbnail preparation.
+- Added `supabase/migrations/202605230004_create_catch_media_storage.sql` for private `catch-originals` and `catch-thumbnails` buckets, Storage ownership policies, and expanded `catch_media` metadata columns.
+- Added `services/catches/uploadCatchPhoto` to validate selected images, compress photos, upload private original/thumbnail objects, and insert `catch_media` metadata.
+- Updated Log Catch submission to upload attached photos after creating the catch, show staged upload progress, handle errors, and allow retry.
+- Kept failed uploads in the local pending media queue for future background retry support.
+- Documented the temporary direct authenticated upload limitation until a backend/Edge Function can issue signed upload URLs.
+
 ### Catch Logging Flow Added
 
 - Added `expo-image-picker` for local catch photo selection.
@@ -9,7 +18,7 @@
 - Added catch validation for required species/date, valid time, non-negative measurements, privacy, and note length.
 - Added `services/catches/` for catch creation, local draft persistence, and local pending media queue.
 - Catch submission now inserts into `catches` and creates/updates `user_fishdex_entries`.
-- Photo selection is local-only for now and queues pending media after submission; Supabase Storage upload is intentionally deferred until signed/private upload policies exist.
+- Photo selection now supports private Supabase Storage upload through the secure media flow.
 - Moved Log Catch draft/submit actions and feedback near the top of the screen so submit is visible on mobile.
 
 ### FishDex Starter Catalog Added

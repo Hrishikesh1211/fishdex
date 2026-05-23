@@ -4,7 +4,7 @@ Last audited: 2026-05-23
 
 ## Audit Status
 
-Supabase client setup, auth/profile service helpers, read-only FishDex catalog/detail services, and the first catch logging service now exist. Product APIs for cloud media upload, subscriptions, analytics, maps, and AI identification are still pending.
+Supabase client setup, auth/profile service helpers, read-only FishDex catalog/detail services, the first catch logging service, and secure private catch photo upload now exist. Product APIs for subscriptions, analytics, maps, and AI identification are still pending.
 
 ## Current APIs
 
@@ -14,7 +14,7 @@ Implemented:
 - Apple and Google provider helpers in `services/auth/oauth.ts`.
 - Profile upsert helper in `services/profiles/profileService.ts`.
 - Read-only FishDex catalog/detail service in `services/fishdex/fishdexService.ts`.
-- Catch creation, local draft persistence, and pending local media queue helpers in `services/catches/`.
+- Catch creation, local draft persistence, pending local media queue helpers, and private catch photo upload in `services/catches/`.
 - Minimal typed Supabase database contract in `types/database.ts`.
 - Database tables for profiles, regions, species, catches, media metadata, FishDex entries, signals, subscriptions, AI classifications, and audit logs.
 
@@ -22,7 +22,7 @@ Expected future integrations:
 
 - Supabase Auth
 - Supabase Postgres
-- Supabase Storage
+- Supabase Storage private catch media buckets
 - Supabase Edge Functions when needed
 - RevenueCat Purchases SDK
 - PostHog analytics
@@ -150,7 +150,7 @@ Current `createCatch` behavior:
 - Inserts into `catches`.
 - Validates required species, date/time, privacy, notes length, and non-negative measurements.
 - Updates or creates `user_fishdex_entries` for catch count and best measurements.
-- Does not upload photos yet.
+- Photo upload is orchestrated by `uploadCatchPhoto` after the catch row exists.
 
 ### Media
 
@@ -162,8 +162,19 @@ Current media behavior:
 
 - The Log Catch screen can pick one local image.
 - Selected image metadata is stored in the local draft.
-- After catch submission, the image is queued locally as pending media for a future signed/private Supabase Storage upload flow.
+- After catch submission, the image is compressed with `expo-image-manipulator`.
+- The compressed original uploads to private bucket `catch-originals`.
+- A generated thumbnail uploads to private bucket `catch-thumbnails`.
+- `catch_media` stores original path, thumbnail path, dimensions, MIME type, file size, and upload status.
+- Upload progress is staged progress from validation through metadata save. Supabase direct mobile uploads do not currently expose byte-level progress.
+- Failed uploads are queued locally and can be retried from the Log Catch screen.
 - Mobile clients must not write permanent public media URLs.
+
+Current direct upload limitation:
+
+- No trusted backend or Edge Function exists yet, so the mobile app uploads directly to private Supabase Storage using the authenticated anon client and Storage RLS.
+- Signed upload URLs are still the target production pattern once a backend boundary exists.
+- Service-role keys remain server-only and are not used by the mobile upload path.
 
 ### Subscription
 

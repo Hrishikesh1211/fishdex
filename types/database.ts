@@ -226,8 +226,14 @@ export type Database = {
             media_type: string;
             storage_bucket: string;
             storage_path: string;
+            thumbnail_storage_bucket: string | null;
+            thumbnail_storage_path: string | null;
             width: number | null;
             height: number | null;
+            thumbnail_width: number | null;
+            thumbnail_height: number | null;
+            mime_type: string | null;
+            file_size_bytes: number | null;
             upload_status: string;
           },
         {
@@ -237,8 +243,14 @@ export type Database = {
           media_type?: string;
           storage_bucket?: string;
           storage_path: string;
+          thumbnail_storage_bucket?: string | null;
+          thumbnail_storage_path?: string | null;
           width?: number | null;
           height?: number | null;
+          thumbnail_width?: number | null;
+          thumbnail_height?: number | null;
+          mime_type?: string | null;
+          file_size_bytes?: number | null;
           upload_status?: string;
           created_at?: string;
           updated_at?: string;
@@ -251,8 +263,14 @@ export type Database = {
           media_type?: string;
           storage_bucket?: string;
           storage_path?: string;
+          thumbnail_storage_bucket?: string | null;
+          thumbnail_storage_path?: string | null;
           width?: number | null;
           height?: number | null;
+          thumbnail_width?: number | null;
+          thumbnail_height?: number | null;
+          mime_type?: string | null;
+          file_size_bytes?: number | null;
           upload_status?: string;
           created_at?: string;
           updated_at?: string;

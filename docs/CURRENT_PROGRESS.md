@@ -4,7 +4,7 @@ Last audited: 2026-05-23
 
 ## Summary
 
-The workspace now contains the documentation memory system, Expo SDK 54 app foundation, design-system foundation, navigation shell, Supabase client setup, centralized Supabase Auth foundation, the first production-oriented database schema migration, starter catalog seed data, the core read-only FishDex browsing experience, and the first catch logging flow.
+The workspace now contains the documentation memory system, Expo SDK 54 app foundation, design-system foundation, navigation shell, Supabase client setup, centralized Supabase Auth foundation, the first production-oriented database schema migration, starter catalog seed data, the core read-only FishDex browsing experience, the first catch logging flow, and private Supabase Storage photo upload for catches.
 
 ## Already Built
 
@@ -42,8 +42,12 @@ The workspace now contains the documentation memory system, Expo SDK 54 app foun
 - Log Catch screen with species selection, photo picker, date/time fields, optional size/weight, notes, privacy, local draft save, and submit.
 - Catch creation service in `services/catches/`.
 - Local catch draft persistence through AsyncStorage.
-- Local pending media queue for future signed private upload.
+- Local pending media queue for failed uploads and future background retry.
 - Catch submission writes `catches` and updates `user_fishdex_entries`.
+- Private Storage bucket migration for `catch-originals` and `catch-thumbnails`.
+- Catch photo compression with `expo-image-manipulator`.
+- Catch photo upload service that stores private original images, generated thumbnails, and `catch_media` metadata.
+- Upload progress, upload error handling, and same-session retry on the Log Catch screen.
 - Best-effort profile upsert after login/session restore.
 - `.env.example` documenting public Supabase env vars and service-role key restrictions.
 - NativeWind configuration wired to shared design tokens.
@@ -62,18 +66,19 @@ The workspace now contains the documentation memory system, Expo SDK 54 app foun
 - Profile creation exists as an auth-time upsert, but profile viewing/editing is not built.
 - Database migrations cover the first production schema and starter catalog, but generated Supabase types are still pending.
 - FishDex browsing exists, but search, catch-driven discovery updates, and richer media-backed species art are pending.
-- Catch logging exists, but catch list/detail/edit and cloud media upload are pending.
+- Catch logging exists, but catch list/detail/edit are pending.
+- Cloud media upload exists through direct authenticated Supabase Storage upload. Signed upload URLs are pending until a backend/Edge Function exists.
 
 ## Incomplete
 
 Everything below is not yet implemented in this workspace:
 
-- Supabase Storage buckets and storage policies.
+- Signed upload URL backend/Edge Function.
 - Supabase dashboard OAuth provider configuration.
 - Password reset, account deletion, and complete profile management.
 - Catch journal list/detail/edit.
 - FishDex catch-driven discovery/progress updates.
-- Media upload.
+- Multi-photo media upload and background retry worker.
 - Local offline drafts.
 - RevenueCat integration.
 - PostHog integration.
@@ -101,8 +106,8 @@ Current technical debt is mostly foundational absence rather than bad implementa
 - RevenueCat, PostHog, and Sentry keys are needed before final integration.
 - Mapbox token and map product scope are needed before map implementation.
 - AI identification provider, consent model, and backend boundary are needed before AI implementation.
-- Cloud photo upload should wait until Supabase Storage bucket and signed/private upload policies are implemented.
-- Supabase Storage bucket/policies are needed before submitted catch photos can upload to cloud storage.
+- Apply `supabase/migrations/202605230004_create_catch_media_storage.sql` in each Supabase environment before testing photo upload there.
+- Signed upload URL support needs a trusted backend/Edge Function.
 
 ## Current Priorities
 
@@ -110,7 +115,7 @@ Current technical debt is mostly foundational absence rather than bad implementa
 2. Add initial smoke tests or verification checklist.
 3. Add FishDex search/sort polish if needed.
 4. Configure Apple and Google auth providers in Supabase and Apple/Google dashboards.
-5. Add catch list/detail/edit or implement signed private photo upload.
+5. Add catch list/detail/edit or add signed upload URL support through a backend/Edge Function.
 
 ## Pending Future Platforms and Services
 

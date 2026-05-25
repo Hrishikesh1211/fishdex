@@ -45,10 +45,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.surface,
     borderColor: colors.border,
-    borderRadius: Number.parseInt(radius.md, 10),
+    borderRadius: Number.parseInt(radius.xl, 10),
     borderWidth: 1,
     gap: Number.parseInt(spacing[4], 10),
-    padding: Number.parseInt(spacing[6], 10),
+    padding: Number.parseInt(spacing[8], 10),
   },
   copy: {
     gap: Number.parseInt(spacing[2], 10),

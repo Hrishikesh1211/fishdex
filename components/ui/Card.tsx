@@ -23,9 +23,9 @@ const styles = StyleSheet.create({
   base: {
     backgroundColor: colors.surface,
     borderColor: colors.border,
-    borderRadius: Number.parseInt(radius.md, 10),
+    borderRadius: Number.parseInt(radius.xl, 10),
     borderWidth: 1,
-    padding: Number.parseInt(spacing[4], 10),
+    padding: Number.parseInt(spacing[5], 10),
   },
   elevated: {
     ...shadows.lifted,

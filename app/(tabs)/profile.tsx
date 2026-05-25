@@ -12,10 +12,10 @@ export default function ProfileScreen() {
   return (
     <ShellScreen
       eyebrow="Profile"
-      title="Your field journal."
-      description="Your account is connected. Membership and journal settings will grow here next."
+      title="Profile."
+      description="Your account and settings."
     >
-      <Card elevated>
+      <Card>
         <View style={styles.stack}>
           <AppText variant="heading" weight="semibold">
             Account
@@ -30,12 +30,12 @@ export default function ProfileScreen() {
           ) : null}
           {profileSyncStatus === "syncing" ? (
             <AppText variant="bodySmall" tone="muted">
-              Syncing profile...
+              Syncing...
             </AppText>
           ) : null}
           <AppButton
             disabled={isSigningOut}
-            label={isSigningOut ? "Signing Out..." : "Sign Out"}
+            label={isSigningOut ? "Signing out..." : "Sign out"}
             onPress={signOut}
             variant="secondary"
           />

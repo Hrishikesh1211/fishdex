@@ -10,19 +10,19 @@ export default function WelcomeScreen() {
   return (
     <ShellScreen
       eyebrow="Welcome"
-      title="Begin beside the water."
-      description="Your catches, discoveries, and field notes are kept behind your account."
+      title="FishQuest."
+      description="Your catches and FishDex in one quiet place."
     >
       <Card elevated>
         <View style={styles.stack}>
           <AppText variant="body" tone="secondary">
-            Sign in to continue your FishQuest archive, or create a new journal before the first cast.
+            Sign in or create an account to begin.
           </AppText>
           <Link href={routes.auth.signIn} asChild>
-            <AppButton label="Sign In" />
+            <AppButton label="Sign in" />
           </Link>
           <Link href={routes.auth.createAccount} asChild>
-            <AppButton label="Create Account" variant="secondary" />
+            <AppButton label="Create account" variant="secondary" />
           </Link>
         </View>
       </Card>

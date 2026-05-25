@@ -1,7 +1,7 @@
 import { StyleSheet, View } from "react-native";
 
 import { AppText, Card, ProgressPill } from "../ui";
-import { spacing } from "../../constants/tokens";
+import { colors, radius, shadows, spacing } from "../../constants/tokens";
 
 type FishdexSummaryProps = {
   discoveredCount: number;
@@ -9,33 +9,68 @@ type FishdexSummaryProps = {
 };
 
 export function FishdexSummary({ discoveredCount, totalCount }: FishdexSummaryProps) {
+  const percent = totalCount > 0 ? Math.round((discoveredCount / totalCount) * 100) : 0;
+
   return (
     <Card elevated>
       <View style={styles.stack}>
-        <View style={styles.header}>
-          <AppText variant="heading" weight="semibold">
-            Archive Progress
-          </AppText>
-          <AppText variant="caption" tone="accent" weight="semibold">
-            {discoveredCount}/{totalCount}
-          </AppText>
+        <View style={styles.cardContent}>
+          <View style={styles.copy}>
+            <AppText variant="caption" tone="muted" weight="semibold">
+              Your Progress
+            </AppText>
+            <AppText variant="display" weight="bold">
+              {percent}%
+            </AppText>
+            <AppText variant="bodySmall" tone="secondary">
+              {discoveredCount} / {totalCount} discovered
+            </AppText>
+          </View>
+          <View style={styles.specimenRing}>
+            <View style={styles.specimenCore}>
+              <AppText variant="heading" tone="accent" weight="bold">
+                FQ
+              </AppText>
+            </View>
+          </View>
         </View>
         <ProgressPill label="Discovered" current={discoveredCount} total={totalCount} />
-        <AppText variant="bodySmall" tone="secondary">
-          Seed species are live. Discoveries will unlock from saved catches in the next journal phase.
-        </AppText>
       </View>
     </Card>
   );
 }
 
 const styles = StyleSheet.create({
-  header: {
+  cardContent: {
     alignItems: "center",
     flexDirection: "row",
+    gap: Number.parseInt(spacing[5], 10),
     justifyContent: "space-between",
   },
+  copy: {
+    flex: 1,
+    gap: Number.parseInt(spacing[1], 10),
+  },
+  specimenCore: {
+    alignItems: "center",
+    backgroundColor: colors.backgroundRaised,
+    borderRadius: Number.parseInt(radius.full, 10),
+    height: 72,
+    justifyContent: "center",
+    width: 72,
+  },
+  specimenRing: {
+    ...shadows.glow,
+    alignItems: "center",
+    backgroundColor: colors.accentSoft,
+    borderColor: colors.accent,
+    borderRadius: Number.parseInt(radius.full, 10),
+    borderWidth: 1,
+    height: 88,
+    justifyContent: "center",
+    width: 88,
+  },
   stack: {
-    gap: Number.parseInt(spacing[3], 10),
+    gap: Number.parseInt(spacing[4], 10),
   },
 });

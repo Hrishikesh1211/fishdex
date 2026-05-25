@@ -42,19 +42,19 @@ export default function FishdexSpeciesDetailScreen() {
 
   return (
     <ShellScreen
-      eyebrow="FishDex Record"
-      title={species?.commonName ?? "Species record."}
-      description="A closer look at this archive entry."
+      eyebrow="FishDex"
+      title={species?.commonName ?? "Fish"}
+      description="Rarity, notes, and where to find it."
     >
       <View style={styles.actions}>
-        <AppButton label="Back to FishDex" onPress={() => router.back()} variant="ghost" />
+        <AppButton label="Back" onPress={() => router.back()} variant="ghost" />
       </View>
 
       {loading ? <LoadingState label="Reading the record" /> : null}
 
       {!loading && errorMessage ? (
         <EmptyState
-          title="This record drifted out."
+          title="Can't load fish."
           message={errorMessage}
           actionLabel="Try Again"
           onAction={loadSpecies}
@@ -64,7 +64,7 @@ export default function FishdexSpeciesDetailScreen() {
       {!loading && !errorMessage && !species ? (
         <EmptyState
           title="No record found."
-          message="Return to the FishDex and choose another species."
+          message="Choose another fish."
           actionLabel="Back"
           onAction={() => router.back()}
         />

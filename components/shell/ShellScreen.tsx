@@ -5,9 +5,9 @@ import { AppScreen, AppText } from "../ui";
 import { spacing } from "../../constants/tokens";
 
 type ShellScreenProps = {
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
-  description: string;
+  description?: string;
   children?: ReactNode;
 };
 
@@ -21,15 +21,19 @@ export function ShellScreen({
     <AppScreen scroll>
       <View style={styles.stack}>
         <View style={styles.hero}>
-          <AppText variant="caption" tone="accent" weight="semibold">
-            {eyebrow}
-          </AppText>
-          <AppText variant="display" weight="bold">
+          {eyebrow ? (
+            <AppText variant="caption" tone="accent" weight="semibold">
+              {eyebrow}
+            </AppText>
+          ) : null}
+          <AppText variant="title" weight="semibold">
             {title}
           </AppText>
-          <AppText variant="bodyLarge" tone="secondary">
-            {description}
-          </AppText>
+          {description ? (
+            <AppText variant="body" tone="secondary">
+              {description}
+            </AppText>
+          ) : null}
         </View>
         {children ? <View style={styles.body}>{children}</View> : null}
       </View>
@@ -42,9 +46,9 @@ const styles = StyleSheet.create({
     gap: Number.parseInt(spacing[4], 10),
   },
   hero: {
-    gap: Number.parseInt(spacing[3], 10),
+    gap: Number.parseInt(spacing[2], 10),
   },
   stack: {
-    gap: Number.parseInt(spacing[6], 10),
+    gap: Number.parseInt(spacing[5], 10),
   },
 });

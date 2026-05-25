@@ -1,6 +1,40 @@
 # FishQuest Changelog
 
+## 2026-05-25
+
+### Catch Screen Reverted
+
+- Reverted the Catch screen to the stable pre-catch-inspiration implementation, preserving upload, offline draft sync, submit, save draft, and validation behavior.
+- Kept FishDex inspiration and global visual foundation changes intact.
+
+### FishDex Experience Refined
+
+- Refined FishDex list cards into whole-card tap targets with larger specimen tiles and less action clutter.
+- Simplified FishDex copy toward clearer user language: FishDex, progress, rarity, discovered, caught, and not caught.
+- Reworked species detail presentation around a larger calm specimen hero, notes, and one compact facts section.
+- Kept rarity colors as small accents instead of full-card backgrounds.
+- Fixed FishDex error copy encoding and kept backend logic, navigation, auth, storage, and offline sync unchanged.
+
 ## 2026-05-23
+
+### Liftoff-Inspired UI Foundation Refined
+
+- Shifted global tokens toward a darker glassy navy foundation with a soft lavender primary accent.
+- Added subtle accent glow treatment for primary buttons and progress fills.
+- Refined shared cards, inputs, buttons, badges, loading states, empty states, and progress indicators.
+- Updated the tab bar to a floating rounded glass surface without changing navigation structure.
+- Tuned the active Catch glyph to feel closer to the reference plus-button treatment.
+- Kept this pass limited to visual foundation and shared design system files; no auth, backend, storage, or business logic was changed.
+
+### Premium Minimal UI Pass
+
+- Refined design tokens toward a calmer off-black/deep navy palette with one primary accent.
+- Reduced shadow intensity, border contrast, and visual noise across cards, buttons, inputs, progress, badges, and empty states.
+- Simplified tab labels to feel more native and obvious: Map, FishDex, Catch, Nearby, Profile.
+- Simplified FishDex wording and cards so the experience feels collectible without dense archive/system language.
+- Simplified Log Catch language and made offline sync indicators appear only when useful.
+- Simplified Map, Nearby, Profile, auth, onboarding, loading, and not-found copy.
+- Kept business logic, auth, database, storage, and offline sync behavior unchanged.
 
 ### Partial Offline Catch Draft Sync Added
 

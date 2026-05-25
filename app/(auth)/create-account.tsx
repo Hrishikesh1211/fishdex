@@ -35,9 +35,9 @@ export default function CreateAccountScreen() {
 
   return (
     <ShellScreen
-      eyebrow="Create Account"
-      title="Start a lasting record."
-      description="Create the private account that will hold your FishDex progress and catches."
+      eyebrow="Create account"
+      title="Start your FishDex."
+      description="Save catches and discoveries."
     >
       <Card>
         <View style={styles.stack}>
@@ -77,14 +77,14 @@ export default function CreateAccountScreen() {
           ) : null}
           <AppButton
             disabled={isBusy}
-            label={action === "signup" ? "Creating..." : "Create Account"}
+            label={action === "signup" ? "Creating..." : "Create account"}
             onPress={handleCreateAccount}
           />
           <Link href={routes.auth.signIn} asChild>
-            <AppButton disabled={isBusy} label="I Already Have an Account" variant="secondary" />
+            <AppButton disabled={isBusy} label="I have an account" variant="secondary" />
           </Link>
           <Link href={routes.auth.welcome} asChild>
-            <AppButton disabled={isBusy} label="Back to Welcome" variant="ghost" />
+            <AppButton disabled={isBusy} label="Back" variant="ghost" />
           </Link>
         </View>
       </Card>

@@ -30,14 +30,14 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: colors.surface,
     borderColor: colors.border,
-    borderRadius: Number.parseInt(radius.md, 10),
+    borderRadius: Number.parseInt(radius.xl, 10),
     borderWidth: 1,
     color: colors.textPrimary,
     fontFamily: typography.fontFamily.body,
     fontSize: Number.parseInt(typography.sizes.body, 10),
     lineHeight: Number.parseInt(typography.lineHeights.body, 10),
-    minHeight: 48,
-    paddingHorizontal: Number.parseInt(spacing[4], 10),
+    minHeight: 52,
+    paddingHorizontal: Number.parseInt(spacing[5], 10),
     paddingVertical: Number.parseInt(spacing[3], 10),
   },
   invalid: {

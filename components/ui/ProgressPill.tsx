@@ -1,6 +1,6 @@
 import { StyleSheet, View, type ViewProps } from "react-native";
 
-import { colors, radius, spacing } from "../../constants/tokens";
+import { colors, radius, shadows, spacing } from "../../constants/tokens";
 import { AppText } from "./AppText";
 
 type ProgressPillProps = ViewProps & {
@@ -42,14 +42,13 @@ export function ProgressPill({
 
 const styles = StyleSheet.create({
   base: {
-    backgroundColor: colors.surfaceElevated,
-    borderColor: colors.border,
-    borderRadius: Number.parseInt(radius.md, 10),
-    borderWidth: 1,
+    backgroundColor: "transparent",
+    borderRadius: Number.parseInt(radius.lg, 10),
     gap: Number.parseInt(spacing[2], 10),
     padding: Number.parseInt(spacing[3], 10),
   },
   fill: {
+    ...shadows.glow,
     backgroundColor: colors.accent,
     borderRadius: Number.parseInt(radius.full, 10),
     height: "100%",
@@ -60,9 +59,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   track: {
-    backgroundColor: colors.backgroundRaised,
+    backgroundColor: colors.surfaceMuted,
     borderRadius: Number.parseInt(radius.full, 10),
-    height: 8,
+    height: 6,
     overflow: "hidden",
   },
 });

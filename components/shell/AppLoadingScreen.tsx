@@ -8,14 +8,11 @@ export function AppLoadingScreen() {
     <AppScreen>
       <View style={styles.content}>
         <View style={styles.copy}>
-          <AppText variant="caption" tone="accent" weight="semibold" align="center">
+          <AppText variant="title" weight="bold" align="center">
             FishQuest
           </AppText>
-          <AppText variant="title" weight="bold" align="center">
-            Reading the water.
-          </AppText>
         </View>
-        <LoadingState label="Opening the field journal" />
+        <LoadingState label="Opening" />
       </View>
     </AppScreen>
   );

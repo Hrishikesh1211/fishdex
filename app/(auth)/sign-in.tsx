@@ -50,9 +50,9 @@ export default function SignInScreen() {
 
   return (
     <ShellScreen
-      eyebrow="Sign In"
-      title="Return to the archive."
-      description="Restore your journal, sightings, and discoveries with Supabase Auth."
+      eyebrow="Sign in"
+      title="Welcome back."
+      description="Continue your FishDex."
     >
       <Card>
         <View style={styles.stack}>
@@ -84,26 +84,26 @@ export default function SignInScreen() {
           ) : null}
           <AppButton
             disabled={isBusy}
-            label={action === "email" ? "Signing In..." : "Sign In with Email"}
+            label={action === "email" ? "Signing in..." : "Sign in"}
             onPress={handleEmailSignIn}
           />
           <AppButton
             disabled={isBusy}
-            label={action === "apple" ? "Opening Apple..." : "Continue with Apple"}
+            label={action === "apple" ? "Opening..." : "Apple"}
             onPress={handleAppleSignIn}
             variant="secondary"
           />
           <AppButton
             disabled={isBusy}
-            label={action === "google" ? "Opening Google..." : "Continue with Google"}
+            label={action === "google" ? "Opening..." : "Google"}
             onPress={handleGoogleSignIn}
             variant="secondary"
           />
           <Link href={routes.auth.createAccount} asChild>
-            <AppButton disabled={isBusy} label="Create Account" variant="ghost" />
+            <AppButton disabled={isBusy} label="Create account" variant="ghost" />
           </Link>
           <Link href={routes.auth.welcome} asChild>
-            <AppButton disabled={isBusy} label="Back to Welcome" variant="ghost" />
+            <AppButton disabled={isBusy} label="Back" variant="ghost" />
           </Link>
         </View>
       </Card>

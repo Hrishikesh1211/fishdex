@@ -26,7 +26,9 @@ export function AppScreen({
   contentStyle,
 }: AppScreenProps) {
   const content = (
-    <View style={[padded && styles.content, contentStyle]}>{children}</View>
+    <View style={[padded && styles.content, contentStyle]}>
+      {children}
+    </View>
   );
 
   return (
@@ -54,6 +56,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: Number.parseInt(spacing[4], 10),
     paddingVertical: Number.parseInt(spacing[6], 10),
+    paddingBottom: Number.parseInt(spacing[20], 10),
   },
   scrollContent: {
     flexGrow: 1,

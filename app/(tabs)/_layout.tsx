@@ -2,7 +2,7 @@ import { Redirect, Tabs } from "expo-router";
 
 import { AppLoadingScreen, TabGlyph } from "../../components/shell";
 import { routes } from "../../constants/routes";
-import { colors, radius, spacing } from "../../constants/tokens";
+import { colors, radius, shadows, spacing } from "../../constants/tokens";
 import { useAuth } from "../../state/auth";
 
 export default function TabsLayout() {
@@ -24,20 +24,28 @@ export default function TabsLayout() {
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: "600",
+          fontSize: 10,
+          fontWeight: "500",
           letterSpacing: 0,
         },
         tabBarStyle: {
-          backgroundColor: colors.backgroundRaised,
+          ...shadows.soft,
+          backgroundColor: colors.surface,
+          borderColor: colors.border,
+          borderRadius: Number.parseInt(radius.xl, 10),
           borderTopColor: colors.border,
-          borderTopWidth: 1,
-          minHeight: 78,
-          paddingBottom: Number.parseInt(spacing[2], 10),
-          paddingTop: Number.parseInt(spacing[2], 10),
+          borderTopWidth: 0,
+          borderWidth: 1,
+          bottom: Number.parseInt(spacing[2], 10),
+          height: 60,
+          left: Number.parseInt(spacing[3], 10),
+          paddingBottom: Number.parseInt(spacing[1], 10),
+          paddingTop: Number.parseInt(spacing[1], 10),
+          position: "absolute",
+          right: Number.parseInt(spacing[3], 10),
         },
         tabBarItemStyle: {
-          borderRadius: Number.parseInt(radius.md, 10),
+          borderRadius: Number.parseInt(radius.full, 10),
         },
       }}
     >
@@ -64,7 +72,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="log-catch"
         options={{
-          title: "Log",
+          title: "Catch",
           tabBarAccessibilityLabel: "Log Catch",
           tabBarIcon: ({ focused }) => <TabGlyph name="log" focused={focused} />,
         }}
@@ -72,7 +80,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="signals"
         options={{
-          title: "Signals",
+          title: "Nearby",
           tabBarIcon: ({ focused }) => <TabGlyph name="signals" focused={focused} />,
         }}
       />

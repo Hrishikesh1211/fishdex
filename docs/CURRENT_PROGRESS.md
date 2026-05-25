@@ -1,10 +1,10 @@
 # FishQuest Current Progress
 
-Last audited: 2026-05-23
+Last audited: 2026-05-25
 
 ## Summary
 
-The workspace now contains the documentation memory system, Expo SDK 54 app foundation, design-system foundation, navigation shell, Supabase client setup, centralized Supabase Auth foundation, the first production-oriented database schema migration, starter catalog seed data, the core read-only FishDex browsing experience, the first catch logging flow, private Supabase Storage photo upload for catches, and partial offline catch draft sync.
+The workspace now contains the documentation memory system, Expo SDK 54 app foundation, refined minimal design system, navigation shell, Supabase client setup, centralized Supabase Auth foundation, the first production-oriented database schema migration, starter catalog seed data, the core read-only FishDex browsing experience, the first catch logging flow, private Supabase Storage photo upload for catches, and partial offline catch draft sync.
 
 ## Already Built
 
@@ -39,7 +39,8 @@ The workspace now contains the documentation memory system, Expo SDK 54 app foun
 - FishDex list has regional filtering.
 - FishDex species cards show rarity and locked/undiscovered states.
 - FishDex species detail route exists at `/fishdex/[id]`.
-- Log Catch screen with species selection, photo picker, date/time fields, optional size/weight, notes, privacy, local draft save, and submit.
+- FishDex visual refinement now uses larger collectible specimen cards, simpler labels, whole-card species taps, and a calmer specimen-focused detail layout.
+- Log Catch screen with species selection, photo picker, date/time fields, optional size/weight, notes, privacy, local draft save, submit, upload progress, and offline sync status.
 - Catch creation service in `services/catches/`.
 - Local catch draft persistence through AsyncStorage.
 - Local pending media queue for failed uploads and future background retry.
@@ -56,6 +57,8 @@ The workspace now contains the documentation memory system, Expo SDK 54 app foun
 - `.env.example` documenting public Supabase env vars and service-role key restrictions.
 - NativeWind configuration wired to shared design tokens.
 - Shared design token source in `constants/design-tokens.json`.
+- Premium minimal UI pass: softer off-black/deep navy palette, quieter cards, reduced shadows, native-feeling tab labels, simpler copy, and lower visual density.
+- Liftoff-inspired foundation pass: glassier dark surfaces, soft lavender primary accent, pill controls, subtle accent glow for key actions/progress, and floating rounded tab bar.
 - Typed token exports in `constants/tokens.ts`.
 - UI primitives under `components/ui/`: `AppScreen`, `AppText`, `AppButton`, `Card`, `RarityBadge`, `ProgressPill`, `EmptyState`, and `LoadingState`.
 - Reduced-motion hook for accessibility-aware UI states.
@@ -69,7 +72,7 @@ The workspace now contains the documentation memory system, Expo SDK 54 app foun
 - Auth routes and behavior are implemented, but password reset and account deletion are pending.
 - Profile creation exists as an auth-time upsert, but profile viewing/editing is not built.
 - Database migrations cover the first production schema and starter catalog, but generated Supabase types are still pending.
-- FishDex browsing exists, but search, catch-driven discovery updates, and richer media-backed species art are pending.
+- FishDex browsing exists, but search, catch-driven discovery updates, and real media-backed species art are pending.
 - Catch logging exists, but catch list/detail/edit are pending.
 - Cloud media upload exists through direct authenticated Supabase Storage upload. Signed upload URLs are pending until a backend/Edge Function exists.
 

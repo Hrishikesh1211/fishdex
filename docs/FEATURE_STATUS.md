@@ -1,6 +1,6 @@
 # FishQuest Feature Status
 
-Last audited: 2026-05-23
+Last audited: 2026-05-25
 
 ## Status Legend
 
@@ -16,8 +16,8 @@ Last audited: 2026-05-23
 | TypeScript setup | Complete | 100% | App scaffold | None | Strict `tsconfig.json`; `npm run typecheck` passes. |
 | Expo Router navigation | In progress | 85% | App scaffold, auth provider | Feature details | Root layout, main tabs, auth routes, premium onboarding placeholder, route constants, not-found route, and auth guards exist. |
 | NativeWind styling | Complete | 100% | App scaffold | None | NativeWind configured with token-backed `tailwind.config.js`, `babel.config.js`, `metro.config.js`, and `global.css`. |
-| UI primitives | In progress | 65% | Design tokens | Lists/selectors not built yet | Core primitives built: AppScreen, AppText, AppTextInput, AppButton, Card, RarityBadge, ProgressPill, EmptyState, LoadingState. |
-| Design tokens | Complete | 100% | NativeWind or constants | None | Colors, spacing, typography, radius, shadows, rarity, and motion tokens exist. |
+| UI primitives | In progress | 75% | Design tokens | Lists/selectors not built yet | Core primitives built and refined for calmer cards, buttons, inputs, empty states, badges, and progress. |
+| Design tokens | Complete | 100% | NativeWind or constants | None | Colors, spacing, typography, radius, shadows, rarity, and motion tokens exist; palette now favors premium minimal off-black/deep navy with one primary accent. |
 | Environment structure | Complete | 100% | Expo public env | Real keys not committed | `.env.example` documents app env, Supabase URL, anon key, and service-role restrictions. |
 | Supabase client | Complete | 100% | Env vars, package install | Real anon key required at runtime | Centralized lazy client exists in `lib/supabase` with SecureStore-backed native session persistence. |
 | Database migrations | In progress | 75% | Supabase project | Generate types | Initial production schema, starter catalog seed, and private catch media Storage migrations exist. Apply new migrations to each Supabase environment before testing. |
@@ -27,10 +27,10 @@ Last audited: 2026-05-23
 | Google Sign In | In progress | 60% | Auth foundation, OAuth config | Google OAuth/Supabase provider setup | Expo WebBrowser OAuth flow implemented; external provider setup still required. |
 | Email auth | In progress | 75% | Supabase Auth | Password reset, email template decisions | Sign in and account creation are implemented. |
 | Profile management | In progress | 20% | Auth, profiles table | Apply migration | Best-effort profile creation exists; editing and full profile UI are pending. |
-| FishDex catalog | In progress | 65% | Species schema, seed data, auth | Search/sort polish and richer species media | Starter seed data, read service, list screen, region filter, locked states, rarity display, and detail route exist. |
+| FishDex catalog | In progress | 75% | Species schema, seed data, auth | Search/sort polish and real species media | Starter seed data, read service, simplified list screen, region filter, locked states, rarity display, refined collectible cards, and detail route exist. |
 | FishDex progress | Planned | 5% | Catches, user_fishdex_entries | Progress service rules | Schema exists; discovery update logic is not implemented. |
-| Species detail | In progress | 55% | FishDex catalog, UI system | Rich media and catch-derived personal records | Detail route exists with rarity, locked state, field notes, habitat, range, and discovery status. |
-| Catch logging | In progress | 65% | Auth, catches table, FishDex species, Storage | Catch list/detail/edit | Log Catch form, local drafts, validation, queued submit, private photo upload, and FishDex progress update exist. |
+| Species detail | In progress | 60% | FishDex catalog, UI system | Real species media and catch-derived personal records | Detail route exists with a specimen-focused hero, rarity, locked state, notes, habitat, range, and discovery status. |
+| Catch logging | In progress | 70% | Auth, catches table, FishDex species, Storage | Catch list/detail/edit | Stable pre-catch-inspiration form, local drafts, validation, queued submit, private photo upload, and FishDex progress update exist. |
 | Catch list | Not started | 0% | Catch logging | List service and UI | Personal journal timeline. |
 | Catch detail/edit | Not started | 0% | Catch list | None | Needed for trust and correction. |
 | Photo upload | In progress | 65% | Supabase Storage, catch logging | Signed upload URL backend and background retry worker | One photo can be compressed, uploaded to private original/thumbnail buckets, linked through `catch_media`, and retried after failure. Direct mobile upload is temporary until a backend exists. |

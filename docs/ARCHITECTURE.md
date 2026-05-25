@@ -119,6 +119,7 @@ Implemented route groups:
 
 - `(tabs)`: main app shell with `map`, `fishdex`, `log-catch`, `signals`, and `profile`.
 - `(tabs)/fishdex/[id]`: hidden tab route for species detail records.
+- `(tabs)/log-catch`: visible Catch tab route with compact composer styling; the tab route remains part of the main app shell.
 - `(auth)`: `welcome`, `sign-in`, `create-account`, and OAuth `callback` routes.
 - `(onboarding)`: placeholder `premium` onboarding route.
 - `+not-found`: tokenized fallback route.

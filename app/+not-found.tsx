@@ -9,14 +9,14 @@ import { spacing } from "../constants/tokens";
 export default function NotFoundScreen() {
   return (
     <ShellScreen
-      eyebrow="Lost Water"
-      title="This route drifted off."
-      description="The shell caught an unknown path before it could become a broken screen."
+      eyebrow="Not found"
+      title="Page not found."
+      description="Let’s go back."
     >
       <Card>
         <View style={styles.stack}>
           <AppText variant="body" tone="secondary">
-            Return to the main map shell.
+            This screen does not exist.
           </AppText>
           <Link href={routes.tabs.map} asChild>
             <AppButton label="Go to Map" />

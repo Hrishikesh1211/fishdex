@@ -1,4 +1,4 @@
-import { StyleSheet, View } from "react-native";
+import { Image, StyleSheet, View } from "react-native";
 
 import type { FishdexCatalogSpecies } from "../../services/fishdex";
 import { colors, radius, rarityColors, spacing } from "../../constants/tokens";
@@ -27,9 +27,19 @@ export function FishdexSpeciesDetail({ species }: FishdexSpeciesDetailProps) {
               species.locked && styles.specimenPlateLocked,
             ]}
           >
-            <AppText variant="display" tone={species.locked ? "muted" : "accent"} weight="bold">
-              {species.locked ? "?" : specimenLabel}
-            </AppText>
+            {species.imageUrl && !species.locked ? (
+              <Image
+                accessibilityIgnoresInvertColors
+                source={{ uri: species.imageUrl }}
+                style={styles.specimenImage}
+              />
+            ) : (
+              <View style={styles.specimenMark}>
+                <AppText variant="display" tone={species.locked ? "muted" : "accent"} weight="bold">
+                  {species.locked ? "?" : specimenLabel}
+                </AppText>
+              </View>
+            )}
           </View>
           <View style={styles.titleStack}>
             <RarityBadge rarity={species.rarity} />
@@ -42,91 +52,115 @@ export function FishdexSpeciesDetail({ species }: FishdexSpeciesDetailProps) {
               </AppText>
             ) : (
               <AppText variant="body" tone="secondary">
-                {species.locked ? "Undiscovered species record" : "Scientific name unavailable"}
+                {species.locked ? "Not found yet" : "Name unavailable"}
               </AppText>
             )}
           </View>
         </View>
       </Card>
 
-      <Card>
-        <View style={styles.stack}>
+      <Card style={styles.notesCard}>
+        <View style={styles.notesStack}>
           <AppText variant="heading" weight="semibold">
-            Field Notes
+            Notes
           </AppText>
           <AppText variant="body" tone="secondary">
             {species.locked
-              ? "The full archive entry is still sealed. Log this species later to reveal its field notes, habitat details, and personal records."
-              : species.description ?? "No field notes have been added yet."}
+              ? "Catch this fish to fill in the details."
+              : species.description ?? "No notes yet."}
           </AppText>
         </View>
       </Card>
 
-      <View style={styles.detailGrid}>
-        <DetailBlock
+      <Card style={styles.factsCard}>
+        <DetailRow
           label="Habitat"
-          value={species.locked ? "Hidden until discovery" : species.habitat ?? "Unknown"}
+          value={species.locked ? "Unknown" : species.habitat ?? "Unknown"}
         />
-        <DetailBlock
-          label="Known Range"
+        <View style={styles.divider} />
+        <DetailRow
+          label="Range"
           value={species.regionNames.length > 0 ? species.regionNames.join(", ") : "Unmapped"}
         />
-        <DetailBlock
-          label="Discovery"
-          value={species.discovered ? `${species.catchCount} logged` : "First sighting pending"}
+        <View style={styles.divider} />
+        <DetailRow
+          label="Discovered"
+          value={species.discovered ? `${species.catchCount} caught` : "Not yet"}
         />
-        <DetailBlock
-          label="Archive State"
-          value={species.locked ? "Locked" : "Open"}
-        />
-      </View>
+      </Card>
     </View>
   );
 }
 
-type DetailBlockProps = {
+type DetailRowProps = {
   label: string;
   value: string;
 };
 
-function DetailBlock({ label, value }: DetailBlockProps) {
+function DetailRow({ label, value }: DetailRowProps) {
   return (
-    <Card style={styles.detailBlock}>
+    <View style={styles.detailRow}>
       <AppText variant="caption" tone="muted" weight="semibold">
         {label}
       </AppText>
-      <AppText variant="bodySmall" tone="secondary">
+      <AppText variant="bodySmall" tone="secondary" style={styles.detailValue}>
         {value}
       </AppText>
-    </Card>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  detailBlock: {
-    flex: 1,
+  detailRow: {
+    alignItems: "flex-start",
     gap: Number.parseInt(spacing[2], 10),
-    minWidth: 140,
   },
-  detailGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: Number.parseInt(spacing[3], 10),
+  detailValue: {
+    maxWidth: "100%",
+  },
+  divider: {
+    backgroundColor: colors.border,
+    height: 1,
+    width: "100%",
+  },
+  factsCard: {
+    gap: Number.parseInt(spacing[4], 10),
   },
   heroStack: {
-    alignItems: "center",
-    gap: Number.parseInt(spacing[4], 10),
+    gap: Number.parseInt(spacing[5], 10),
+  },
+  notesCard: {
+    backgroundColor: colors.surface,
+  },
+  notesStack: {
+    gap: Number.parseInt(spacing[3], 10),
   },
   scientificName: {
     fontStyle: "italic",
   },
+  specimenImage: {
+    height: "100%",
+    resizeMode: "cover",
+    width: "100%",
+  },
+  specimenMark: {
+    alignItems: "center",
+    backgroundColor: colors.accentSoft,
+    borderColor: colors.borderStrong,
+    borderRadius: Number.parseInt(radius.full, 10),
+    borderWidth: 1,
+    height: 112,
+    justifyContent: "center",
+    width: 112,
+  },
   specimenPlate: {
     alignItems: "center",
-    aspectRatio: 1,
+    aspectRatio: 1.18,
     backgroundColor: colors.backgroundRaised,
-    borderRadius: Number.parseInt(radius.md, 10),
+    borderRadius: Number.parseInt(radius.xl, 10),
     borderWidth: 1,
     justifyContent: "center",
+    overflow: "hidden",
     width: "100%",
   },
   specimenPlateLocked: {

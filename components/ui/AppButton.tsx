@@ -8,7 +8,7 @@ import {
   type ViewStyle,
 } from "react-native";
 
-import { colors, radius, spacing, motion } from "../../constants/tokens";
+import { colors, radius, shadows, spacing } from "../../constants/tokens";
 import { AppText } from "./AppText";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 
@@ -23,16 +23,17 @@ type AppButtonProps = Omit<PressableProps, "children" | "style"> & {
 
 const variantStyles: Record<AppButtonVariant, ViewStyle> = {
   primary: {
+    ...shadows.glow,
     backgroundColor: colors.accent,
     borderColor: colors.accent,
   },
   secondary: {
-    backgroundColor: colors.accentSoft,
-    borderColor: colors.borderStrong,
+    backgroundColor: colors.surfaceElevated,
+    borderColor: colors.border,
   },
   ghost: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
+    backgroundColor: "transparent",
+    borderColor: "transparent",
   },
 };
 
@@ -83,25 +84,25 @@ export function AppButton({
 const styles = StyleSheet.create({
   base: {
     alignItems: "center",
-    borderRadius: Number.parseInt(radius.md, 10),
+    borderRadius: Number.parseInt(radius.full, 10),
     borderWidth: 1,
     flexDirection: "row",
     gap: Number.parseInt(spacing[2], 10),
     justifyContent: "center",
     minHeight: 48,
-    paddingHorizontal: Number.parseInt(spacing[4], 10),
+    paddingHorizontal: Number.parseInt(spacing[5], 10),
     paddingVertical: Number.parseInt(spacing[3], 10),
   },
   disabled: {
-    opacity: 0.5,
+    opacity: 0.46,
   },
   icon: {
     minHeight: 20,
     minWidth: 20,
   },
   pressed: {
-    opacity: 0.84,
-    transform: [{ scale: 0.99 }],
+    opacity: 0.88,
+    transform: [{ scale: 0.985 }],
   },
   primaryLabel: {
     color: colors.background,

@@ -30,8 +30,8 @@ export function RarityBadge({ rarity, style, ...props }: RarityBadgeProps) {
       style={[
         styles.base,
         {
-          borderColor: rarityColors[rarity],
-          backgroundColor: colors.surfaceElevated,
+          borderColor: colors.border,
+          backgroundColor: colors.surfaceMuted,
         },
         style,
       ]}
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flexDirection: "row",
     gap: Number.parseInt(spacing[2], 10),
-    minHeight: 32,
+    minHeight: 26,
     paddingHorizontal: Number.parseInt(spacing[3], 10),
   },
   dot: {

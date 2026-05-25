@@ -18,7 +18,7 @@ export function FishdexRegionFilter({
   return (
     <View style={styles.wrapper}>
       <AppText variant="caption" tone="muted" weight="semibold">
-        Region
+        Area
       </AppText>
       <ScrollView
         horizontal
@@ -27,14 +27,14 @@ export function FishdexRegionFilter({
       >
         <FilterChip
           active={selectedRegionId === null}
-          label="All waters"
+          label="All"
           onPress={() => onSelectRegion(null)}
         />
         {regions.map((region) => (
           <FilterChip
             key={region.id}
             active={selectedRegionId === region.id}
-            label={`${region.name} (${region.speciesCount})`}
+            label={region.name}
             onPress={() => onSelectRegion(region.id)}
           />
         ))}
@@ -71,16 +71,16 @@ function FilterChip({ active, label, onPress }: FilterChipProps) {
 const styles = StyleSheet.create({
   chip: {
     alignItems: "center",
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceMuted,
     borderColor: colors.border,
     borderRadius: Number.parseInt(radius.full, 10),
-    borderWidth: 1,
+    borderWidth: 0,
     justifyContent: "center",
     minHeight: 40,
-    paddingHorizontal: Number.parseInt(spacing[3], 10),
+    paddingHorizontal: Number.parseInt(spacing[4], 10),
   },
   chipActive: {
-    backgroundColor: colors.accentSoft,
+    backgroundColor: colors.accent,
     borderColor: colors.accent,
   },
   chipPressed: {

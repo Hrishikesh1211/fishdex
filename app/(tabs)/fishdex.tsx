@@ -54,19 +54,19 @@ export default function FishDexScreen() {
   }, [catalog, selectedRegionId]);
 
   const selectedRegionName =
-    catalog?.regions.find((region) => region.id === selectedRegionId)?.name ?? "Starter Catalog";
+    catalog?.regions.find((region) => region.id === selectedRegionId)?.name ?? "All fish";
 
   return (
     <ShellScreen
       eyebrow="FishDex"
-      title="Species archive."
-      description="A quiet field guide of the fish waiting to be discovered."
+      title="FishDex"
+      description="Catch fish. Fill your collection."
     >
       {loading ? <LoadingState label="Opening the FishDex" /> : null}
 
       {!loading && errorMessage ? (
         <EmptyState
-          title="The archive is out of reach."
+          title="Can't load FishDex."
           message={errorMessage}
           actionLabel="Try Again"
           onAction={loadCatalog}
@@ -75,8 +75,8 @@ export default function FishDexScreen() {
 
       {!loading && catalog && catalog.totalCount === 0 ? (
         <EmptyState
-          title="No species recorded."
-          message="Apply the starter catalog seed migration to reveal the first entries."
+          title="No fish yet."
+          message="Add the starter fish to begin."
           actionLabel="Refresh"
           onAction={loadCatalog}
         />
@@ -108,8 +108,8 @@ export default function FishDexScreen() {
           ))}
           {filteredSpecies.length === 0 ? (
             <EmptyState
-              title="No entries in this water."
-              message="Try another region to continue browsing the starter archive."
+              title="Nothing here yet."
+              message="Try another area."
             />
           ) : null}
         </View>

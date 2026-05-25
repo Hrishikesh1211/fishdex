@@ -71,6 +71,7 @@ The workspace now contains the documentation memory system, Expo SDK 54 app foun
 
 - Auth routes and behavior are implemented, but password reset and account deletion are pending.
 - Profile creation exists as an auth-time upsert, but profile viewing/editing is not built.
+- Profile tab now has a presentational progression UI using auth identity, starter achievements, simple stats, and a recent-catch empty state; real profile metrics are pending.
 - Database migrations cover the first production schema and starter catalog, but generated Supabase types are still pending.
 - FishDex browsing exists, but search, catch-driven discovery updates, and real media-backed species art are pending.
 - Catch logging exists, but catch list/detail/edit are pending.

@@ -184,6 +184,17 @@ The Log Catch screen uses existing primitives rather than a separate form system
 
 Catch logging should stay calm and field-friendly. Avoid dense utility forms, exact coordinate exposure, noisy gamified feedback during the save flow, or catch-specific inspiration rewrites until the product direction is re-approved.
 
+## Profile And Progression UI
+
+The Profile tab is currently a presentational progression surface backed by auth identity only:
+
+- Lead with a personal identity card, not an account/settings dashboard.
+- Keep progression instantly readable: one level label, one progress bar, and a small stat row.
+- Achievements should feel collectible through small marks, subtle rarity/accent color, and compact progress bars.
+- Recent catches should be calm and journal-like; empty states should invite the first catch without adding clutter.
+- Avoid excessive stats, dense metrics, leaderboard language, or loud gamified panels.
+- Until profile/catch aggregation services exist, do not imply live totals beyond the data actually available.
+
 ## Accessibility Rules
 
 - Text must meet contrast requirements.

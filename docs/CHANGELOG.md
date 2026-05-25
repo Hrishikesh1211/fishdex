@@ -2,6 +2,11 @@
 
 ## 2026-05-25
 
+### Profile Progression Refined
+
+- Refined the Profile tab into a calmer premium progression surface with identity, level progress, simple stats, starter achievements, and recent-catch empty state.
+- Kept the pass presentational only; auth, profile sync, sign out, backend logic, and catch data flows were not changed.
+
 ### Catch Screen Reverted
 
 - Reverted the Catch screen to the stable pre-catch-inspiration implementation, preserving upload, offline draft sync, submit, save draft, and validation behavior.

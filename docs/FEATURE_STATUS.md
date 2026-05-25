@@ -26,7 +26,7 @@ Last audited: 2026-05-25
 | Apple Sign In | In progress | 60% | Auth foundation, Apple config | Apple developer/Supabase provider setup | Native client flow implemented with nonce; external provider setup still required. |
 | Google Sign In | In progress | 60% | Auth foundation, OAuth config | Google OAuth/Supabase provider setup | Expo WebBrowser OAuth flow implemented; external provider setup still required. |
 | Email auth | In progress | 75% | Supabase Auth | Password reset, email template decisions | Sign in and account creation are implemented. |
-| Profile management | In progress | 20% | Auth, profiles table | Apply migration | Best-effort profile creation exists; editing and full profile UI are pending. |
+| Profile management | In progress | 30% | Auth, profiles table | Real profile metrics and editing | Best-effort profile creation exists; Profile tab now has presentational identity/progression UI, but editing and live profile stats are pending. |
 | FishDex catalog | In progress | 75% | Species schema, seed data, auth | Search/sort polish and real species media | Starter seed data, read service, simplified list screen, region filter, locked states, rarity display, refined collectible cards, and detail route exist. |
 | FishDex progress | Planned | 5% | Catches, user_fishdex_entries | Progress service rules | Schema exists; discovery update logic is not implemented. |
 | Species detail | In progress | 60% | FishDex catalog, UI system | Real species media and catch-derived personal records | Detail route exists with a specimen-focused hero, rarity, locked state, notes, habitat, range, and discovery status. |
